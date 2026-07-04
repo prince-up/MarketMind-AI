@@ -10,6 +10,8 @@ import type {
   CompetitorAnalysis,
   RiskAnalysis,
   ValuationAnalysis,
+  EarningsHistoryEntry,
+  AnalystData,
 } from "@/types";
 
 // ─── Yahoo Finance instance ───────────────────────────────────────────────────
@@ -59,6 +61,14 @@ export const GraphState = Annotation.Root({
     default: () => null,
   }),
   valuationData: Annotation<ValuationAnalysis | null>({
+    reducer: (_, b) => b,
+    default: () => null,
+  }),
+  earnings: Annotation<EarningsHistoryEntry[]>({
+    reducer: (_, b) => b,
+    default: () => [],
+  }),
+  analystData: Annotation<AnalystData | null>({
     reducer: (_, b) => b,
     default: () => null,
   }),
@@ -239,6 +249,42 @@ const fetchFinancials = async (state: typeof GraphState.State) => {
     const ticker = searchRes.quotes[0].symbol as string;
     const quote = await yf.quote(ticker);
 
+    let earnings: EarningsHistoryEntry[] = [];
+    let analystData: AnalystData | null = null;
+    try {
+      const summary = await yf.quoteSummary(ticker, { modules: ['earningsHistory', 'recommendationTrend', 'financialData'] });
+      
+      if (summary.earningsHistory?.history) {
+        earnings = summary.earningsHistory.history
+          .filter((h: any) => h.quarter && h.epsActual !== undefined)
+          .map((h: any) => ({
+            quarter: h.quarter instanceof Date ? h.quarter.toISOString() : String(h.quarter),
+            epsActual: h.epsActual ?? 0,
+            epsEstimate: h.epsEstimate ?? 0,
+            epsDifference: h.epsDifference ?? 0,
+            surprisePercent: h.surprisePercent ?? 0
+          }));
+      }
+
+      if (summary.recommendationTrend?.trend?.[0]) {
+        const trend = summary.recommendationTrend.trend[0];
+        const finData = (summary.financialData as any) || {};
+        
+        analystData = {
+          strongBuy: trend.strongBuy ?? 0,
+          buy: trend.buy ?? 0,
+          hold: trend.hold ?? 0,
+          sell: trend.sell ?? 0,
+          strongSell: trend.strongSell ?? 0,
+          targetMeanPrice: finData.targetMeanPrice ?? 0,
+          numberOfAnalystOpinions: finData.numberOfAnalystOpinions ?? 0,
+          recommendationKey: finData.recommendationKey ?? 'none'
+        };
+      }
+    } catch (e) {
+      console.warn("[fetch_financials] Failed to fetch extended yahoo finance data:", e);
+    }
+
     const rawText = [
       `Ticker: ${ticker}`,
       `Current Price: ${quote.regularMarketPrice != null ? `$${quote.regularMarketPrice}` : "N/A"}`,
@@ -275,6 +321,8 @@ const fetchFinancials = async (state: typeof GraphState.State) => {
     console.log(`[fetch_financials] OK. Ticker=${ticker} Score=${finalScore}`);
     return {
       financialData: { ticker, ...result, score: finalScore, rawText, sources: ["Yahoo Finance"] } as FinancialSummary,
+      earnings,
+      analystData
     };
   } catch (err) {
     console.error("[fetch_financials] Error:", err);

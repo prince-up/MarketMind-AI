@@ -64,6 +64,25 @@ export interface ValuationAnalysis {
   sources: string[];
 }
 
+export interface EarningsHistoryEntry {
+  quarter: string;
+  epsActual: number;
+  epsEstimate: number;
+  epsDifference: number;
+  surprisePercent: number;
+}
+
+export interface AnalystData {
+  strongBuy: number;
+  buy: number;
+  hold: number;
+  sell: number;
+  strongSell: number;
+  targetMeanPrice: number;
+  numberOfAnalystOpinions: number;
+  recommendationKey: string;
+}
+
 export interface ResearchResult {
   companyName: string;
   verdict: "BUY" | "HOLD" | "PASS";
@@ -77,4 +96,6 @@ export interface ResearchResult {
   competitors: CompetitorAnalysis;
   risks: RiskAnalysis;
   valuation: ValuationAnalysis;
+  earnings?: EarningsHistoryEntry[];
+  analystData?: AnalystData;
 }

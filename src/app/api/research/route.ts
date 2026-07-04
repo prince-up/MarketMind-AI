@@ -104,6 +104,8 @@ export async function POST(request: Request) {
               negatives: ["Valuation data unavailable."],
               sources: ["Yahoo Finance"]
             },
+            earnings: accumulatedState.earnings || [],
+            analystData: accumulatedState.analystData || null,
           };
 
           controller.enqueue(

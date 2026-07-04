@@ -15,6 +15,8 @@ import {
 import type { ResearchResult } from "@/types";
 import SourceTag from "./SourceTag";
 import ScoreGauge from "./ScoreGauge";
+import EarningsHistory from "./EarningsHistory";
+import AnalystRecommendation from "./AnalystRecommendation";
 
 interface DetailedReportProps {
   report: ResearchResult;
@@ -211,8 +213,18 @@ export default function DetailedReport({ report }: DetailedReportProps) {
 
       </div>
 
-      {/* ─── ROW 2: News Sentiment & Competitors ─── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* ─── ROW 2: Earnings & Analyst Recommendation ─── */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        {report.earnings && report.earnings.length > 0 && (
+          <EarningsHistory earnings={report.earnings} />
+        )}
+        {report.analystData && report.analystData.numberOfAnalystOpinions > 0 && (
+          <AnalystRecommendation analystData={report.analystData} />
+        )}
+      </div>
+
+      {/* ─── ROW 3: News Sentiment & Competitors ─── */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
         
         {/* News Sentiment Card */}
         <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 flex flex-col justify-between shadow-lg relative overflow-hidden group hover:-translate-y-1 hover:shadow-2xl hover:border-neutral-700 transition-all duration-300">
@@ -315,8 +327,8 @@ export default function DetailedReport({ report }: DetailedReportProps) {
 
       </div>
 
-      {/* ─── ROW 3: Risk Analysis ─── */}
-      <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 shadow-lg relative overflow-hidden group hover:-translate-y-1 hover:shadow-2xl hover:border-neutral-700 transition-all duration-300">
+      {/* ─── ROW 4: Risk Analysis ─── */}
+      <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 shadow-lg relative overflow-hidden group hover:-translate-y-1 hover:shadow-2xl hover:border-neutral-700 transition-all duration-300 mt-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-neutral-950 rounded-xl border border-neutral-800">
