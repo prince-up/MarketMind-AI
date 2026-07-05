@@ -3,12 +3,14 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { BookOpen, Brain, Clock, Sparkles } from "lucide-react";
+import { BookOpen, Brain, Clock, FileSearch, Sparkles, TrendingUp } from "lucide-react";
+import AppShell from "@/components/layout/AppShell";
 import CompanyInput from "@/components/CompanyInput";
 import HelpChatWidget from "@/components/HelpChatWidget";
 import MethodologyPanel from "@/components/MethodologyPanel";
-import StockPageHeader from "@/components/StockPageHeader";
 import StockShortlistCard from "@/components/StockShortlistCard";
+import Card from "@/components/ui/Card";
+import Badge from "@/components/ui/Badge";
 import { TRENDING_STOCKS } from "@/lib/popularStocks";
 import { stockPagePath } from "@/lib/stockSlug";
 import { createClient } from "@/lib/supabase/client";
@@ -44,58 +46,83 @@ export default function DashboardPage() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col bg-white text-[#44475b]">
-      <StockPageHeader
+    <>
+      <AppShell
         onSearch={navigateToStock}
         credits={credits}
+        userName={userName}
         onMethodologyOpen={() => setIsMethodologyOpen(true)}
-        logoHref="/dashboard"
-      />
-
-      <div className="w-full max-w-6xl flex-1 mx-auto px-4 md:px-8 py-8 md:py-10 space-y-10">
-        <section>
-          <div className="mb-6">
-            <h1 className="text-2xl md:text-3xl font-extrabold text-[#44475b] tracking-tight">
+      >
+        {/* Welcome card */}
+        <div className="mb-6">
+          <Card padding="lg" className="mb-4 bg-gradient-to-br from-white to-[var(--primary-muted)]/20">
+            <Badge variant="primary" className="mb-3">
+              <Sparkles className="w-3 h-3" />
+              Research workspace
+            </Badge>
+            <h1 className="text-2xl md:text-3xl font-bold text-[var(--text-primary)] tracking-tight">
               {userName ? `Welcome back, ${userName}` : "Research Hub"}
             </h1>
-            <p className="text-[#7c7e8c] mt-1.5 text-sm md:text-base">
+            <p className="text-[var(--text-secondary)] mt-1.5 text-sm md:text-base">
               Search any stock to view charts, fundamentals, and run AI research.
             </p>
-          </div>
+          </Card>
           <CompanyInput onResearch={navigateToStock} submitLabel="Search" variant="dashboard" />
-        </section>
+        </div>
 
-        <section className="grid sm:grid-cols-2 gap-4">
+        {/* Stats row */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {[
+            { label: "Research credits", value: credits !== null ? String(credits) : "—", icon: Sparkles, color: "text-amber-600 bg-amber-50" },
+            { label: "Stocks tracked", value: "10K+", icon: TrendingUp, color: "text-[var(--primary)] bg-[var(--primary-muted)]" },
+            { label: "Reports run", value: "0", icon: FileSearch, color: "text-blue-600 bg-blue-50" },
+            { label: "Avg. research time", value: "<30s", icon: Clock, color: "text-violet-600 bg-violet-50" },
+          ].map((stat) => (
+            <Card key={stat.label} padding="sm" className="flex items-start gap-3">
+              <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${stat.color}`}>
+                <stat.icon className="w-4 h-4" />
+              </div>
+              <div>
+                <div className="text-xl font-bold text-[var(--text-primary)]">{stat.value}</div>
+                <div className="text-xs text-[var(--text-muted)] mt-0.5">{stat.label}</div>
+              </div>
+            </Card>
+          ))}
+        </div>
+
+        {/* Quick actions */}
+        <div className="grid sm:grid-cols-2 gap-4 mb-8">
           <button
             onClick={() => navigateToStock("NVIDIA")}
-            className="flex items-start gap-4 p-5 bg-[#fafafa] rounded-2xl border border-[#e9e9eb] hover:border-[#00b386]/40 hover:shadow-md transition-all text-left group"
+            className="flex items-start gap-4 p-5 bg-white rounded-xl border border-[var(--border)] hover:border-[color-mix(in_srgb,var(--primary)_30%,var(--border))] hover:shadow-md transition-all text-left group"
           >
-            <div className="w-11 h-11 rounded-xl bg-[#00b386]/10 flex items-center justify-center shrink-0 group-hover:bg-[#00b386]/15 transition-colors">
-              <Brain className="w-5 h-5 text-[#00b386]" />
+            <div className="w-10 h-10 rounded-lg bg-[var(--primary-muted)] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <Brain className="w-5 h-5 text-[var(--primary)]" />
             </div>
             <div>
-              <h3 className="font-bold text-[#44475b] mb-1">Run AI Research</h3>
-              <p className="text-sm text-[#7c7e8c]">Search a stock and generate a full AI analysis report.</p>
+              <h3 className="font-semibold text-[var(--text-primary)] mb-1">Run AI Research</h3>
+              <p className="text-sm text-[var(--text-secondary)]">Search a stock and generate a full AI analysis report.</p>
             </div>
           </button>
           <button
             onClick={() => setIsMethodologyOpen(true)}
-            className="flex items-start gap-4 p-5 bg-[#fafafa] rounded-2xl border border-[#e9e9eb] hover:border-[#00b386]/40 hover:shadow-md transition-all text-left group"
+            className="flex items-start gap-4 p-5 bg-white rounded-xl border border-[var(--border)] hover:border-[color-mix(in_srgb,var(--primary)_30%,var(--border))] hover:shadow-md transition-all text-left group"
           >
-            <div className="w-11 h-11 rounded-xl bg-[#00b386]/10 flex items-center justify-center shrink-0 group-hover:bg-[#00b386]/15 transition-colors">
-              <BookOpen className="w-5 h-5 text-[#00b386]" />
+            <div className="w-10 h-10 rounded-lg bg-[var(--primary-muted)] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <BookOpen className="w-5 h-5 text-[var(--primary)]" />
             </div>
             <div>
-              <h3 className="font-bold text-[#44475b] mb-1">View Methodology</h3>
-              <p className="text-sm text-[#7c7e8c]">Understand how our AI scoring and research engine works.</p>
+              <h3 className="font-semibold text-[var(--text-primary)] mb-1">View Methodology</h3>
+              <p className="text-sm text-[var(--text-secondary)]">Understand how our AI scoring and research engine works.</p>
             </div>
           </button>
-        </section>
+        </div>
 
-        <section>
+        {/* Trending stocks */}
+        <section className="mb-8">
           <div className="flex items-center justify-between mb-5">
-            <h2 className="text-xl font-bold text-[#44475b]">Trending to research</h2>
-            <Link href="/#stocks" className="text-sm font-semibold text-[#00b386] hover:text-[#00926d]">
+            <h2 className="text-lg font-semibold text-[var(--text-primary)]">Trending to research</h2>
+            <Link href="/#stocks" className="text-sm font-medium text-[var(--primary)] hover:text-[var(--primary-hover)]">
               See all
             </Link>
           </div>
@@ -106,24 +133,28 @@ export default function DashboardPage() {
           </div>
         </section>
 
+        {/* Recent activity empty state */}
         <section>
-          <h2 className="text-xl font-bold text-[#44475b] mb-5">Recently viewed</h2>
-          <div className="flex flex-col items-center justify-center py-12 bg-[#fafafa] rounded-2xl border border-dashed border-[#e9e9eb]">
-            <Clock className="w-8 h-8 text-[#7c7e8c]/50 mb-3" />
-            <p className="text-sm text-[#7c7e8c]">Stocks you research will appear here.</p>
+          <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-5">Recent activity</h2>
+          <div className="flex flex-col items-center justify-center py-14 bg-white rounded-xl border border-dashed border-[var(--border)]">
+            <div className="w-12 h-12 rounded-xl bg-[var(--surface-muted)] flex items-center justify-center mb-4">
+              <Clock className="w-6 h-6 text-[var(--text-muted)]" />
+            </div>
+            <p className="text-sm font-medium text-[var(--text-primary)] mb-1">No recent activity</p>
+            <p className="text-sm text-[var(--text-muted)] mb-4">Stocks you research will appear here.</p>
             <button
               onClick={() => navigateToStock("Tesla")}
-              className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-[#00b386] hover:text-[#00926d]"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--primary)] hover:text-[var(--primary-hover)]"
             >
               <Sparkles className="w-4 h-4" />
               Research Tesla to get started
             </button>
           </div>
         </section>
-      </div>
+      </AppShell>
 
       <HelpChatWidget />
       <MethodologyPanel isOpen={isMethodologyOpen} onClose={() => setIsMethodologyOpen(false)} />
-    </main>
+    </>
   );
 }

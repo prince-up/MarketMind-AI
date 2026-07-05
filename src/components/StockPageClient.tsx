@@ -3,13 +3,14 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Download, Loader2 } from "lucide-react";
+import AppShell from "@/components/layout/AppShell";
 import StockDashboard from "@/components/StockDashboard";
-import StockPageHeader from "@/components/StockPageHeader";
 import DetailedReport from "@/components/DetailedReport";
 import VerdictCard from "@/components/VerdictCard";
 import ResearchProgress from "@/components/ResearchProgress";
 import HelpChatWidget from "@/components/HelpChatWidget";
 import MethodologyPanel from "@/components/MethodologyPanel";
+import Button from "@/components/ui/Button";
 import { ResearchResult } from "@/types";
 import { stockPagePath } from "@/lib/stockSlug";
 import { createClient } from "@/lib/supabase/client";
@@ -18,10 +19,9 @@ type ResearchState = "idle" | "loading" | "result";
 
 interface StockPageClientProps {
   slug: string;
-  logoHref?: string;
 }
 
-export default function StockPageClient({ slug, logoHref = "/" }: StockPageClientProps) {
+export default function StockPageClient({ slug }: StockPageClientProps) {
   const router = useRouter();
   const supabase = createClient();
 
@@ -31,14 +31,17 @@ export default function StockPageClient({ slug, logoHref = "/" }: StockPageClien
   const [completedNodes, setCompletedNodes] = useState<string[]>([]);
   const [companyName, setCompanyName] = useState("");
   const [credits, setCredits] = useState<number | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
   const [isMethodologyOpen, setIsMethodologyOpen] = useState(false);
 
   useEffect(() => {
-    const fetchCredits = async () => {
+    const fetchUser = async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser();
       if (user) {
+        const meta = user.user_metadata?.full_name ?? user.email?.split("@")[0];
+        setUserName(meta ?? null);
         const { data } = await supabase
           .from("profiles")
           .select("credits")
@@ -47,7 +50,7 @@ export default function StockPageClient({ slug, logoHref = "/" }: StockPageClien
         if (data) setCredits(data.credits);
       }
     };
-    fetchCredits();
+    fetchUser();
   }, [supabase]);
 
   const handleSearch = useCallback(
@@ -147,9 +150,9 @@ export default function StockPageClient({ slug, logoHref = "/" }: StockPageClien
   };
 
   const aiResearchSection = (
-    <div id="ai-research" className="scroll-mt-36 pt-4">
+    <div id="ai-research" className="scroll-mt-24 pt-4">
       {researchState === "loading" && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start w-full mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start w-full mb-8">
           <div className="lg:col-span-1">
             <ResearchProgress
               companyName={companyName}
@@ -157,8 +160,8 @@ export default function StockPageClient({ slug, logoHref = "/" }: StockPageClien
               completedNodes={completedNodes}
             />
           </div>
-          <div className="lg:col-span-2 flex items-center justify-center h-64 bg-slate-50 rounded-lg border border-slate-200">
-            <Loader2 className="w-8 h-8 text-[#00b386] animate-spin" />
+          <div className="lg:col-span-2 flex items-center justify-center h-64 bg-white rounded-xl border border-[var(--border)]">
+            <Loader2 className="w-8 h-8 text-[var(--primary)] animate-spin" />
           </div>
         </div>
       )}
@@ -166,16 +169,11 @@ export default function StockPageClient({ slug, logoHref = "/" }: StockPageClien
       {researchState === "result" && result && (
         <div className="space-y-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-[20px] font-semibold text-[#44475b]">AI Research Report</h2>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={handleDownloadPDF}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg transition-colors"
-              >
-                <Download className="w-4 h-4" />
-                Export PDF
-              </button>
-            </div>
+            <h2 className="text-lg font-semibold text-[var(--text-primary)]">AI Research Report</h2>
+            <Button variant="outline" size="sm" onClick={handleDownloadPDF}>
+              <Download className="w-4 h-4" />
+              Export PDF
+            </Button>
           </div>
 
           <VerdictCard
@@ -192,40 +190,34 @@ export default function StockPageClient({ slug, logoHref = "/" }: StockPageClien
       )}
 
       {researchState === "idle" && (
-        <div className="py-12 text-center border border-dashed border-slate-200 rounded-lg bg-slate-50/50">
-          <p className="text-[#7c7e8c] text-sm mb-4">
+        <div className="py-12 text-center border border-dashed border-[var(--border)] rounded-xl bg-[var(--surface-muted)]">
+          <p className="text-[var(--text-secondary)] text-sm mb-4">
             Run AI research to get financial health, valuation, news sentiment, and a buy/hold/pass verdict.
           </p>
-          <button
-            onClick={() => handleRunResearch(companyName || slug.replace(/-/g, " "))}
-            className="inline-flex items-center gap-2 bg-[#00b386] hover:bg-[#00926d] text-white font-semibold px-6 py-3 rounded-lg transition-colors"
-          >
+          <Button onClick={() => handleRunResearch(companyName || slug.replace(/-/g, " "))}>
             Run AI Research
-          </button>
+          </Button>
         </div>
       )}
     </div>
   );
 
   return (
-    <main className="min-h-screen flex flex-col items-center bg-white text-slate-900">
-      <StockPageHeader
+    <>
+      <AppShell
         onSearch={handleSearch}
         credits={credits}
+        userName={userName}
         onMethodologyOpen={() => setIsMethodologyOpen(true)}
-        logoHref={logoHref}
-      />
-
-      <div className="w-full max-w-[1280px] flex-1 px-4 md:px-8 py-8">
-        <div className="mb-4">
-          <button
-            onClick={() => router.back()}
-            className="flex items-center gap-2 text-sm text-[#7c7e8c] hover:text-[#44475b] transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back
-          </button>
-        </div>
+        searchPlaceholder="Search stocks..."
+      >
+        <button
+          onClick={() => router.back()}
+          className="flex items-center gap-2 text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors mb-4"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back
+        </button>
 
         <StockDashboard
           ticker={slug}
@@ -234,10 +226,10 @@ export default function StockPageClient({ slug, logoHref = "/" }: StockPageClien
           researchState={researchState}
           aiResearchSection={aiResearchSection}
         />
-      </div>
+      </AppShell>
 
       <HelpChatWidget />
       <MethodologyPanel isOpen={isMethodologyOpen} onClose={() => setIsMethodologyOpen(false)} />
-    </main>
+    </>
   );
 }

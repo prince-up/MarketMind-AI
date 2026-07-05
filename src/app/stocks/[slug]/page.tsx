@@ -6,5 +6,5 @@ interface StockPageProps {
 
 export default async function StockPage({ params }: StockPageProps) {
   const { slug } = await params;
-  return <StockPageClient slug={slug} logoHref="/" />;
+  return <StockPageClient slug={slug} />;
 }

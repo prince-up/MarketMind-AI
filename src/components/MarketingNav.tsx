@@ -3,25 +3,20 @@
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronDown, Menu, Search, Sparkles, X } from "lucide-react";
+import { Menu, Search, Sparkles, X } from "lucide-react";
 import { stockPagePath } from "@/lib/stockSlug";
+import Button from "@/components/ui/Button";
 
 const NAV_LINKS = [
+  { label: "Features", href: "/#features" },
+  { label: "Pricing", href: "/#pricing" },
   { label: "Stocks", href: "/#stocks" },
-  { label: "Research", href: "/#features" },
-];
-
-const MORE_LINKS = [
-  { label: "Methodology", href: "/dashboard" },
-  { label: "Dashboard", href: "/dashboard" },
-  { label: "About", href: "/#features" },
 ];
 
 export default function MarketingNav() {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [moreOpen, setMoreOpen] = useState(false);
   const [query, setQuery] = useState("");
 
   const handleSearch = (e: React.FormEvent) => {
@@ -45,86 +40,56 @@ export default function MarketingNav() {
   }, []);
 
   return (
-    <nav className="fixed top-0 w-full z-50 border-b border-[#e9e9eb] bg-white/95 backdrop-blur-xl">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-[60px] flex items-center gap-4">
-        {/* Logo + links */}
-        <div className="flex items-center gap-6 shrink-0">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-[#00b386] flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-white" />
-            </div>
-            <span className="font-bold text-[#44475b] text-base hidden sm:block">MarketMind</span>
-          </Link>
-          <div className="hidden lg:flex items-center gap-6">
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.label}
-                href={link.href}
-                className="text-sm font-medium text-[#44475b] hover:text-[#00b386] transition-colors"
-              >
-                {link.label}
-              </Link>
-            ))}
-            <div className="relative">
-              <button
-                onClick={() => setMoreOpen(!moreOpen)}
-                className="flex items-center gap-1 text-sm font-medium text-[#44475b] hover:text-[#00b386] transition-colors"
-              >
-                More <ChevronDown className="w-3.5 h-3.5" />
-              </button>
-              {moreOpen && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setMoreOpen(false)} />
-                  <div className="absolute top-full left-0 mt-2 w-44 bg-white rounded-xl border border-[#e9e9eb] shadow-lg py-2 z-50">
-                    {MORE_LINKS.map((link) => (
-                      <Link
-                        key={link.label}
-                        href={link.href}
-                        onClick={() => setMoreOpen(false)}
-                        className="block px-4 py-2 text-sm text-[#44475b] hover:bg-[#f6f6f7] hover:text-[#00b386]"
-                      >
-                        {link.label}
-                      </Link>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
+    <nav className="fixed top-0 w-full z-50 border-b border-[var(--border)] bg-white/80 backdrop-blur-xl">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-[var(--topbar-height)] flex items-center gap-4">
+        <Link href="/" className="flex items-center gap-2.5 shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-[var(--primary)] flex items-center justify-center shadow-sm">
+            <Sparkles className="w-4 h-4 text-white" />
           </div>
+          <span className="font-semibold text-[var(--text-primary)] text-[15px] hidden sm:block">
+            MarketMind
+          </span>
+        </Link>
+
+        <div className="hidden md:flex items-center gap-1 ml-4">
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.label}
+              href={link.href}
+              className="px-3 py-1.5 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded-lg hover:bg-[var(--surface-muted)] transition-colors"
+            >
+              {link.label}
+            </Link>
+          ))}
         </div>
 
-        {/* Centered search */}
-        <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-md mx-auto relative">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7c7e8c]" />
+        <form onSubmit={handleSearch} className="hidden lg:flex flex-1 max-w-sm mx-auto relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
           <input
             ref={inputRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search MarketMind..."
-            className="w-full h-9 pl-10 pr-20 rounded-lg border border-[#e9e9eb] bg-[#f6f6f7] text-sm text-[#44475b] outline-none focus:border-[#00b386] focus:bg-white focus:ring-1 focus:ring-[#00b386]/30 transition-all placeholder:text-[#7c7e8c]"
+            placeholder="Search stocks..."
+            className="w-full h-9 pl-9 pr-16 rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] text-sm text-[var(--text-primary)] outline-none focus:border-[var(--primary)] focus:bg-white focus:ring-2 focus:ring-[var(--primary-muted)] transition-all placeholder:text-[var(--text-muted)]"
           />
-          <kbd className="absolute right-3 top-1/2 -translate-y-1/2 hidden lg:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-medium text-[#7c7e8c] bg-white border border-[#e9e9eb] rounded">
-            Ctrl+K
+          <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 hidden xl:inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium text-[var(--text-muted)] bg-white border border-[var(--border)] rounded">
+            ⌘K
           </kbd>
         </form>
 
-        {/* Auth CTAs */}
-        <div className="flex items-center gap-2 shrink-0 ml-auto md:ml-0">
+        <div className="flex items-center gap-2 shrink-0 ml-auto">
           <Link
             href="/login"
-            className="hidden sm:inline text-sm font-semibold text-[#44475b] hover:text-[#00b386] px-3 py-2 transition-colors"
+            className="hidden sm:inline text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] px-3 py-2 transition-colors"
           >
-            Login
+            Log in
           </Link>
-          <Link
-            href="/signup"
-            className="px-4 py-2 text-sm font-semibold text-white bg-[#00b386] hover:bg-[#00926d] rounded-full transition-colors"
-          >
-            Sign up
+          <Link href="/signup" className="hidden sm:block">
+            <Button size="sm">Sign up free</Button>
           </Link>
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="lg:hidden p-2 rounded-lg text-[#44475b] hover:bg-[#f6f6f7]"
+            className="md:hidden p-2 rounded-lg text-[var(--text-secondary)] hover:bg-[var(--surface-muted)]"
             aria-label="Toggle menu"
           >
             {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -133,26 +98,34 @@ export default function MarketingNav() {
       </div>
 
       {mobileOpen && (
-        <div className="lg:hidden border-t border-[#e9e9eb] bg-white px-4 py-4 space-y-3">
+        <div className="md:hidden border-t border-[var(--border)] bg-white px-4 py-4 space-y-3">
           <form onSubmit={handleSearch} className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7c7e8c]" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search MarketMind..."
-              className="w-full h-10 pl-10 pr-4 rounded-lg border border-[#e9e9eb] text-sm outline-none focus:border-[#00b386]"
+              placeholder="Search stocks..."
+              className="w-full h-10 pl-10 pr-4 rounded-lg border border-[var(--border)] text-sm outline-none focus:border-[var(--primary)]"
             />
           </form>
-          {[...NAV_LINKS, ...MORE_LINKS].map((link) => (
+          {NAV_LINKS.map((link) => (
             <Link
               key={link.label}
               href={link.href}
               onClick={() => setMobileOpen(false)}
-              className="block text-sm font-medium text-[#44475b] py-2"
+              className="block text-sm font-medium text-[var(--text-secondary)] py-2"
             >
               {link.label}
             </Link>
           ))}
+          <div className="flex gap-2 pt-2">
+            <Link href="/login" className="flex-1 text-center py-2.5 text-sm font-medium border border-[var(--border)] rounded-xl">
+              Log in
+            </Link>
+            <Link href="/signup" className="flex-1 text-center py-2.5 text-sm font-semibold text-white bg-[var(--primary)] rounded-xl">
+              Sign up
+            </Link>
+          </div>
         </div>
       )}
     </nav>

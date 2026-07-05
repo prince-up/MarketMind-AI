@@ -1,16 +1,43 @@
 @import "tailwindcss";
 
 :root {
+  /* Brand */
+  --primary: #00b386;
+  --primary-hover: #00926d;
+  --primary-muted: rgba(0, 179, 134, 0.1);
+  --destructive: #ef4444;
+
+  /* Surfaces */
   --background: #ffffff;
-  --foreground: #44475b;
-  --brand-green: #00b386;
-  --brand-green-hover: #00926d;
-  --brand-red: #eb5b3c;
-  --text-primary: #44475b;
-  --text-muted: #7c7e8c;
-  --border-light: #e9e9eb;
-  --surface-muted: #fafafa;
-  --dark-bg: #1a1a2e;
+  --foreground: #0f172a;
+  --surface: #ffffff;
+  --surface-muted: #f8fafc;
+  --surface-elevated: #ffffff;
+
+  /* Text */
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+
+  /* Borders & shadows */
+  --border: #e2e8f0;
+  --border-subtle: #f1f5f9;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+
+  /* Layout */
+  --sidebar-width: 240px;
+  --topbar-height: 56px;
+  --radius: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+
+  /* Legacy aliases */
+  --brand-green: var(--primary);
+  --brand-green-hover: var(--primary-hover);
+  --brand-red: #ef4444;
+  --border-light: var(--border);
 }
 
 @theme inline {
@@ -19,32 +46,60 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
-  --color-brand-green: #00b386;
-  --color-brand-green-hover: #00926d;
-  --color-brand-red: #eb5b3c;
-  --color-text-primary: #44475b;
-  --color-text-muted: #7c7e8c;
-  --color-border-light: #e9e9eb;
-  --color-surface-muted: #fafafa;
-  --color-dark-bg: #1a1a2e;
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-muted: var(--primary-muted);
+  --color-destructive: var(--destructive);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+
+  --color-brand-green: var(--primary);
+  --color-brand-green-hover: var(--primary-hover);
+  --color-brand-red: var(--destructive);
 }
 
 html, body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
-  letter-spacing: 0;
+  letter-spacing: -0.011em;
+  -webkit-font-smoothing: antialiased;
 }
 
-button,
-a {
+button, a {
   -webkit-tap-highlight-color: transparent;
 }
 
 button:focus-visible,
 a:focus-visible {
-  outline: 2px solid #00b386;
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
+}
+
+/* SaaS card utility */
+.saas-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.saas-card:hover {
+  border-color: color-mix(in srgb, var(--primary) 30%, var(--border));
+  box-shadow: var(--shadow-md);
+}
+
+/* Gradient hero background */
+.hero-gradient {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 179, 134, 0.12), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 50%, rgba(0, 179, 134, 0.06), transparent),
+    var(--background);
 }
 
 /* Animations */
@@ -54,6 +109,17 @@ a:focus-visible {
 }
 .animate-pulse-slow {
   animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--border-subtle) 25%, var(--border) 50%, var(--border-subtle) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius);
 }
 
 .scrollbar-hide {
@@ -71,10 +137,12 @@ a:focus-visible {
     print-color-adjust: exact;
     background: #ffffff !important;
   }
-  
-  button, 
+
+  button,
   #help-chat-widget,
-  .no-print {
+  .no-print,
+  aside,
+  nav {
     display: none !important;
   }
 

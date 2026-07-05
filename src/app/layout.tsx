@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AI Investment Research Agent",
-  description: "AI-powered company investment analysis",
+  title: "MarketMind — AI Stock Research",
+  description: "AI-powered stock research with live charts, fundamentals, and investment analysis",
 };
 
 export default function RootLayout({
