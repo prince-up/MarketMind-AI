@@ -275,17 +275,8 @@ src/
 │   └── supabase/                # Auth clients
 └── types/index.ts               # ResearchResult and sub-type schemas
 docs/
-├── BUILD_LOG.md                 # AI-assisted development log
 └── EXAMPLE_RUNS.md              # Sample agent outputs
 ```
-
----
-
-## AI Development Documentation
-
-This project was built with AI-assisted development (Cursor IDE). An honest build log summarizing the iterative process is in **[`docs/BUILD_LOG.md`](docs/BUILD_LOG.md)**.
-
-To include full Cursor chat transcripts in your submission zip, export them from Cursor and place them in the `docs/` folder.
 
 ---
 
