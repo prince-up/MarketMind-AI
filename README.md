@@ -1,160 +1,294 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MarketMind — AI Investment Research Agent
 
-## Getting Started
+**InsideIIM × Altuni AI Labs Assignment Submission**
 
-First, run the development server:
+MarketMind is a multi-agent investment research console that analyzes any public company across five dimensions—financials, news sentiment, competitive position, risk, and valuation—and synthesizes a structured **BUY / HOLD / PASS** recommendation with explainable confidence scoring.
+
+**Live demo:** [https://marketmind-ai.vercel.app](https://marketmind-ai.vercel.app) *(update this URL after deploying to your Vercel project)*
+
+---
+
+## 1. Overview
+
+MarketMind helps retail and early-stage investors research stocks without reading dozens of filings and news articles manually. A user searches for a company (e.g., NVIDIA, Zomato, PC Jeweller), views a Groww-inspired stock page with live market data, and optionally runs a deep AI research pass that streams results node-by-node.
+
+**What the agent produces:**
+
+| Output | Description |
+|--------|-------------|
+| **Verdict** | `BUY`, `HOLD`, or `PASS` |
+| **Confidence** | 10–99%, computed deterministically from weighted sub-scores |
+| **Financial health** | Revenue growth, P/E, market cap, cash flow, debt, profitability |
+| **News sentiment** | Positive/negative/neutral with key events and investment impact |
+| **Competitor analysis** | Market position, strengths/weaknesses, named peers |
+| **Risk matrix** | Categorized risks with severity levels |
+| **Valuation** | Undervalued / Fairly Valued / Overvalued assessment |
+| **Earnings & analyst data** | EPS surprise history and analyst recommendation breakdown |
+
+**Key differentiators:**
+
+- **Real data first** — Yahoo Finance for fundamentals; Tavily for news and competitor search (not hallucinated figures)
+- **Multi-node LangGraph pipeline** — each analysis dimension is a separate reasoning step, not one monolithic prompt
+- **Explainable confidence** — weighted formula, not an LLM-invented percentage
+- **Streaming UX** — users see each agent node complete in real time
+- **Groww-style stock pages** — instant `/stocks/[slug]` pages with charts and fundamentals; AI research is optional
+
+> **Disclaimer:** MarketMind is an AI research assistant, not licensed financial advice. Always consult a qualified advisor before investing.
+
+---
+
+## 2. How to Run It
+
+### Prerequisites
+
+- **Node.js** 20+
+- **npm** (or pnpm/yarn)
+- API keys for **Groq**, **Tavily**, and **Supabase**
+
+### Setup
 
 ```bash
+# Clone the repository
+git clone https://github.com/prince-up/MarketMind-AI.git
+cd MarketMind-AI
+
+# Install dependencies
+npm install
+
+# Copy environment template and fill in your keys
+cp .env.example .env.local
+```
+
+### Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `GROQ_API_KEY` | Yes | Groq API key for Llama 3.3 70B (agent + help chat) |
+| `TAVILY_API_KEY` | Yes | Tavily API key for news and competitor web search |
+| `NEXT_PUBLIC_SUPABASE_URL` | Yes | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Supabase anonymous/public key |
+
+See [`.env.example`](.env.example) for the full template.
+
+### Supabase Setup
+
+1. Create a Supabase project at [supabase.com](https://supabase.com).
+2. Run the SQL in [`supabase_schema.sql`](supabase_schema.sql) in the Supabase SQL editor to create the `profiles` table (credits + tier) and signup trigger.
+3. Enable Email auth (or your preferred provider) under Authentication → Providers.
+
+### Run Locally
+
+```bash
+# Development server (http://localhost:3000)
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Production build
+npm run build
+npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Usage Flow
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Visit `/` for the marketing landing page, or `/dashboard` after signing in.
+2. Search a company — you are routed to `/stocks/[slug]` (e.g. `/stocks/nvidia`, `/stocks/pc-jeweller-ltd`).
+3. View live price, chart, and fundamentals instantly via `/api/stock`.
+4. Click **Run AI Research** to trigger the LangGraph agent (requires login; consumes 1 credit).
+5. Watch nodes stream: `fetch_financials` → `fetch_news` → `analyze_competitors` → `assess_risks` → `evaluate_valuation` → `final_decision`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Deploy to Vercel (Bonus)
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
-# AI Development Log — AI Investment Research Agent
-
-This document captures how AI (Claude + Antigravity/Groq-powered coding assistant) was used throughout the build process — planning, prompt engineering, debugging, and design decisions. It's structured chronologically to show the actual thought process, not a cleaned-up narrative.
+1. Push the repo to GitHub.
+2. Import the project in [Vercel](https://vercel.com/new).
+3. Add all environment variables from `.env.example` in Project Settings → Environment Variables.
+4. Deploy. Update the live URL at the top of this README.
 
 ---
 
-## Tools Used
-- **Claude (Anthropic)** — planning, architecture decisions, debugging analysis, prompt drafting for Antigravity, code review
-- **Antigravity (AI coding assistant)** — actual code generation, executed the prompts drafted with Claude
-- **LLM in the app itself**: Started with Gemini 2.0 Flash, switched to Groq (Llama 3.3 70B) due to persistent free-tier quota issues
+## 3. How It Works
 
----
+### Architecture
 
-## Phase 1: Planning & Architecture
+MarketMind uses a **sequential LangGraph.js StateGraph** where each node fetches or analyzes one dimension, accumulates state, and feeds the next node. The final node synthesizes a recommendation; confidence is calculated in code, not by the LLM.
 
-**Problem:** Needed to build an AI Investment Research Agent using React/Next.js + Node.js + LangGraph.js per the assignment's mandated stack.
+```mermaid
+flowchart TD
+    subgraph Client["Next.js Client"]
+        LP["Landing / Dashboard"]
+        SP["/stocks/[slug]"]
+        UI["StockDashboard + AI Report UI"]
+    end
 
-**Approach discussed with Claude:**
-- Broke the agent into a sequential LangGraph.js pipeline: fetch_financials → fetch_news → analyze_competitors → assess_risks → evaluate_valuation → final_decision
-- Decided on Yahoo Finance (yahoo-finance2) for financials and Tavily for news/competitor search — both because they were free/low-friction to integrate
-- Discussed how to differentiate from other students' submissions: depth of reasoning per factor (not a single LLM call), real data instead of hallucinated numbers, explainability in the UI, and a clearly justified investment philosophy
+    subgraph API["Next.js API Routes"]
+        SR["POST /api/research"]
+        ST["GET /api/stock"]
+        HC["POST /api/help-chat"]
+    end
 
-**Key decision:** Multi-node graph with each factor (financial, news, competitor, risk, valuation) as its own reasoning step, feeding into a final structured decision — rather than one big prompt asking for everything at once.
+    subgraph Agent["LangGraph Agent (src/lib/agent.ts)"]
+        N1["fetch_financials"]
+        N2["fetch_news"]
+        N3["analyze_competitors"]
+        N4["assess_risks"]
+        N5["evaluate_valuation"]
+        N6["final_decision"]
+    end
 
----
+    subgraph External["External Services"]
+        YF["Yahoo Finance"]
+        TV["Tavily Search"]
+        GQ["Groq LLM"]
+        SB["Supabase Auth + Postgres"]
+    end
 
-## Phase 2: Frontend Build
-
-**Prompt used (via Antigravity):**
-> Build the FRONTEND ONLY (no backend logic yet) for a Next.js 14 (App Router) web application called "AI Investment Research Agent"... [full prompt used — see prompts/frontend_prompt.txt]
-
-**Outcome:** Generated CompanyInput, ResearchProgress, VerdictCard, DetailedReport components with mock data, dark fintech-style UI.
-
-*(Antigravity successfully built out the entire UI structure, including styled components and responsive layout.)*
-
----
-
-## Phase 3: Backend / LangGraph Agent Build
-
-**Prompt used:** Full LangGraph.js StateGraph spec — nodes for fetch_financials, fetch_news, analyze_competitors, assess_risks, evaluate_valuation, final_decision, using Zod for structured output.
-
-*(Antigravity implemented the `agent.ts` and Next.js API route to execute this graph and stream updates back to the UI.)*
-
----
-
-## Phase 4: Debugging Round 1 — Environment/Library Mismatches
-
-Three bugs surfaced on first real run:
-
-1. **`yahoo-finance2` v3 API change** — needed `new YahooFinance()` instantiation instead of static import calls. Fixed by instantiating the class properly.
-2. **Tavily tool input schema mismatch** — `TavilySearch.invoke()` expected an object (`{ query: "..." }`), not a raw string. Fixed the call signature in both fetchNews and analyzeCompetitors nodes.
-3. **`gemini-1.5-flash` deprecated (404)** — swapped to `gemini-2.0-flash`.
-
-**Reflection:** These were classic "library version drift" bugs — none were logic errors, all were API contract mismatches that only show up at runtime, reinforcing the value of reading actual error stack traces rather than guessing.
-
----
-
-## Phase 5: Debugging Round 2 — Gemini Quota Issues
-
-Even after fixing the model name, hit persistent `429 Too Many Requests` with `limit: 0` on the free tier — across multiple fresh API keys. Diagnosed as a project/account-level free-tier eligibility issue, not a key problem (confirmed by testing with a brand-new key that showed the identical error).
-
-**Decision:** Rather than lose more days chasing a Google Cloud billing/eligibility issue this close to the deadline, switched the LLM provider entirely — from `@langchain/google-genai` to `@langchain/groq` (Llama 3.3 70B Versatile), which has a genuinely functional free tier with no billing setup required.
-
-**Trade-off noted for README:** This is a good example of a pragmatic engineering call — prioritizing working software over sticking with the "planned" provider when the planned provider had an environment-specific blocker outside the code itself.
-
----
-
-## Phase 6: Production-Grade Refactor
-
-Restructured every agent node to return strict typed JSON (financial scores, risk scores with severity levels, structured competitor comparisons) instead of prose paragraphs, and designed a **weighted, deterministic confidence formula** instead of letting the LLM invent a confidence percentage:
-
-```
-confidence = (financialScore * 0.30) + (newsSentimentScore * 0.20)
-           + ((100 - riskScore) * 0.20) + (valuationScore * 0.20)
-           + (competitorScore * 0.10)
+    LP --> SP
+    SP --> ST
+    ST --> YF
+    SP -->|"Run AI Research"| SR
+    SR --> SB
+    SR --> Agent
+    N1 --> YF
+    N1 --> GQ
+    N2 --> TV
+    N2 --> GQ
+    N3 --> TV
+    N3 --> GQ
+    N4 --> GQ
+    N5 --> GQ
+    N6 --> GQ
+    N1 --> N2 --> N3 --> N4 --> N5 --> N6
+    SR -->|"NDJSON stream"| UI
+    HC --> GQ
 ```
 
-Note: riskScore is inverted in the formula since a higher risk score means lower investment confidence.
+### Agent Pipeline
+
+| Node | Data Source | LLM Task |
+|------|-------------|----------|
+| `fetch_financials` | Yahoo Finance (`quote`, `quoteSummary`) | Structured financial health assessment + score |
+| `fetch_news` | Tavily web search | Sentiment, key events, investment impact |
+| `analyze_competitors` | Tavily web search | Market position, peer comparison, competitive score |
+| `assess_risks` | Prior node outputs | Risk categories, severity, risk score |
+| `evaluate_valuation` | Prior node outputs | Undervalued/Fair/Overvalued verdict + score |
+| `final_decision` | All accumulated state | BUY/HOLD/PASS, reasoning, summary |
+
+Each node uses **Zod schemas** with Groq structured output. Numeric scores are coerced in TypeScript after the LLM returns (to avoid JSON Schema transform issues).
+
+### Confidence Formula
+
+Confidence is computed deterministically in `final_decision`:
+
+```
+confidence = (financialScore × 0.30)
+           + (newsSentimentScore × 0.20)
+           + ((100 − riskScore) × 0.20)
+           + (valuationScore × 0.20)
+           + (competitorScore × 0.10)
+```
+
+Clamped to **10–99**. News sentiment maps to: positive = 80, neutral = 50, negative = 20.
+
+### API Streaming
+
+`POST /api/research` returns **newline-delimited JSON** events:
+
+- `{ type: "node_complete", node: "fetch_financials", data: {...} }` — per-node updates
+- `{ type: "complete", result: ResearchResult }` — final payload
+- `{ type: "error", error: "..." }` — on failure
+
+Auth is enforced via Supabase; each successful run deducts 1 credit from the user's `profiles` row.
+
+### Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Framework | **Next.js 16** (App Router, React 19) |
+| Runtime | **Node.js** |
+| Agent orchestration | **LangGraph.js** |
+| LLM | **Groq** — Llama 3.3 70B Versatile |
+| Web search | **Tavily** |
+| Market data | **Yahoo Finance** (`yahoo-finance2`) |
+| Auth & credits | **Supabase** (Postgres + Auth) |
+| Styling | Tailwind CSS 4 |
+| Charts | Recharts |
+| Validation | Zod 4 |
 
 ---
 
-## Phase 7: Debugging Round 3 — Structured Output / Zod Schema Issues
+## 4. Key Decisions & Trade-offs
 
-Groq's structured-output tool-calling surfaced a new class of bugs:
-
-1. Numeric fields sometimes returned as strings (`"80"` instead of `80`), or placeholder text (`"Not Provided"`) where a number was expected.
-2. Competitor schema rejected extra fields the LLM added on its own (`aiLeadership`, `pricing`, `growth`).
-3. A strict `.min(2)` requirement on the `positives` array caused failures when the LLM legitimately had only one positive to report.
-
-**First attempted fix (incorrect):** Tried using `z.preprocess()` inside the schema passed to `.withStructuredOutput()` to coerce strings to numbers. This broke ALL nodes with a new error: *"Transforms cannot be represented in JSON Schema"* — because Groq converts the Zod schema to JSON Schema for tool-calling, and JSON Schema has no way to represent a Zod transform function.
-
-**Corrected fix:** Kept the Zod schema transform-free (plain `z.union([z.number(), z.string()])`), and moved the string-to-number coercion into plain TypeScript logic executed *after* the LLM call returns — a `toSafeNumber()` helper. Also relaxed strict array minimums to `.min(0).default([])`, and added `.catchall(z.any())` to the competitor schema to tolerate extra LLM-added fields.
-
-**Reflection:** This was a useful lesson in where validation logic belongs — the LLM-facing contract (JSON Schema) needs to stay simple and representable, while data cleaning/coercion belongs in application code, not inside the schema itself.
-
----
-
-## Phase 8: Frontend Defensive Programming
-
-Fixed a `Cannot read properties of undefined (reading 'map')` crash in `VerdictCard.tsx` and a similar one in `DetailedReport.tsx` — both caused by the frontend assuming API response fields would always be present, even when an upstream node had failed and returned a fallback. Added nullish-coalescing defaults (`?? []`) on every array field rendered via `.map()`, and ensured the API route always returns a complete, safely-defaulted response shape regardless of which nodes succeeded.
+| Decision | Rationale | Trade-off |
+|----------|-----------|-----------|
+| **Sequential graph vs. parallel** | Simpler state management; risk/valuation nodes need prior outputs | Slower than parallel fetch (~30–60s total) |
+| **Groq over Gemini** | Gemini free tier hit persistent 429 quota limits during development | Groq model may differ in reasoning quality vs. Gemini Pro |
+| **Yahoo Finance for fundamentals** | Free, no API key, works for US and many Indian tickers (`.NS`) | Limited Indian-specific fields (circuits, shareholding); occasional ticker resolution failures |
+| **Tavily for news/competitors** | Easy LangChain integration, good for recent web content | Search quality varies; not a substitute for paid news APIs |
+| **Deterministic confidence** | Prevents LLM from inventing arbitrary confidence percentages | Formula weights are fixed; not personalized to user risk tolerance |
+| **Structured output via Zod** | Reliable JSON parsing for UI rendering | Groq JSON Schema cannot represent Zod transforms; coercion done post-LLM |
+| **Groww-style stock pages** | Instant UX for browsing; AI research is opt-in | Two data paths to maintain (`/api/stock` + agent) |
+| **Credit-gated research** | Demonstrates auth + Postgres integration; limits API cost abuse | Adds signup friction for AI features |
+| **Fallback data on node failure** | UI never crashes on partial failures | Scores may default to 50 when data is unavailable |
 
 ---
 
-## Phase 9: Trust & UX Polish
+## 5. Example Runs
 
-Discussed with Claude how to make the tool feel credible without resorting to fake trust signals (e.g., no fabricated user counts or testimonials — inappropriate for a research tool and indefensible in an interview). Instead:
-- Added a "How this works" methodology panel explaining the 5-factor analysis and the exact confidence weighting formula
-- Added source attribution tags (Yahoo Finance / Tavily) on every data card
-- Added a clear "not financial advice" disclaimer
-- Added a lightweight help chatbot scoped only to explaining the tool's methodology (not re-doing investment research)
+Structured example outputs for NVIDIA, Zomato (Eternal Ltd), and PC Jeweller are documented in **[`docs/EXAMPLE_RUNS.md`](docs/EXAMPLE_RUNS.md)**.
+
+Quick summary:
+
+| Company | Verdict | Confidence | Highlights |
+|---------|---------|------------|------------|
+| NVIDIA | BUY | 78% | Strong financials, AI leadership, elevated valuation risk |
+| Zomato (Eternal) | HOLD | 62% | Food delivery growth, competition from Swiggy, path to profitability |
+| PC Jeweller | PASS | 41% | Weak fundamentals, high risk, limited competitive moat |
 
 ---
 
-## Final Reflection — What This Process Demonstrates
+## 6. What I Would Improve With More Time
 
-The AI usage throughout this project was iterative and diagnostic, not "one prompt, one output." Each phase involved:
-1. Running the actual code and reading real error output
-2. Diagnosing root cause (library version drift, API contract change, schema/JSON-Schema incompatibility, provider-side quota issue)
-3. Drafting a targeted fix with reasoning for *why* it should work
-4. Verifying the fix against real output
-5. Course-correcting when a fix (the Zod preprocess attempt) turned out to be wrong
+1. **Parallel data fetching** — Run `fetch_financials`, `fetch_news`, and `analyze_competitors` concurrently to cut latency by ~40%.
+2. **Indian market depth** — Integrate NSE/BSE APIs for circuits, shareholding patterns, and promoter holdings.
+3. **Research history** — Persist past runs in Supabase so users can compare analyses over time.
+4. **PDF export polish** — Improve report PDF layout with charts and source citations.
+5. **Caching layer** — Redis or Vercel KV to cache Yahoo/Tavily responses for popular tickers.
+6. **Evaluation suite** — Golden-test cases with expected score ranges to catch LLM drift.
+7. **RAG over filings** — Ingest 10-K/annual reports for deeper fundamental analysis.
+8. **Portfolio view** — Track multiple holdings and aggregate risk exposure.
 
-This is the same loop a working engineer uses AI for day-to-day — and is the reason every part of this codebase can be explained and defended.
+---
+
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   ├── research/route.ts    # LangGraph streaming endpoint
+│   │   ├── stock/route.ts       # Yahoo Finance stock data
+│   │   └── help-chat/route.ts   # Methodology assistant
+│   ├── dashboard/page.tsx       # Authenticated research hub
+│   ├── stocks/[slug]/page.tsx   # Groww-style stock pages
+│   └── page.tsx                 # Marketing landing page
+├── components/                  # UI (StockDashboard, VerdictCard, etc.)
+├── lib/
+│   ├── agent.ts                 # LangGraph StateGraph definition
+│   └── supabase/                # Auth clients
+└── types/index.ts               # ResearchResult and sub-type schemas
+docs/
+├── BUILD_LOG.md                 # AI-assisted development log
+└── EXAMPLE_RUNS.md              # Sample agent outputs
+```
+
+---
+
+## AI Development Documentation
+
+This project was built with AI-assisted development (Cursor IDE). An honest build log summarizing the iterative process is in **[`docs/BUILD_LOG.md`](docs/BUILD_LOG.md)**.
+
+To include full Cursor chat transcripts in your submission zip, export them from Cursor and place them in the `docs/` folder.
+
+---
+
+## License
+
+See [LICENSE](LICENSE).
