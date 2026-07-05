@@ -1,9 +1,23 @@
 import { signup } from '../login/actions'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
 import AuthLayout from '@/components/layout/AuthLayout'
+import { createClient } from '@/lib/supabase/server'
 
 export default async function SignupPage(props: { searchParams: Promise<{ error?: string, message?: string }> }) {
-  const searchParams = await props.searchParams;
+  const cookieStore = await cookies()
+  const hasSessionCookie = cookieStore.getAll().some(({ name }) => name.startsWith('sb-'))
+
+  if (hasSessionCookie) {
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (user) redirect('/dashboard')
+  }
+
+  const searchParams = await props.searchParams
 
   return (
     <AuthLayout title="Create your account" subtitle="Start researching stocks with free AI credits">

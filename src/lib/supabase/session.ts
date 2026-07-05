@@ -1,7 +1,35 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+function hasSupabaseSessionCookie(request: NextRequest): boolean {
+  return request.cookies.getAll().some(({ name }) => name.startsWith('sb-'))
+}
+
 export async function updateSession(request: NextRequest) {
+  const pathname = request.nextUrl.pathname
+  const isAuthPage = pathname.startsWith('/login') || pathname.startsWith('/signup')
+  const isProtectedRoute =
+    pathname.startsWith('/dashboard') && !pathname.startsWith('/stocks')
+  const hasSessionCookie = hasSupabaseSessionCookie(request)
+
+  // Unauthenticated visitors to login/signup: skip Supabase network call.
+  // Proxy redirects break RSC client navigation ("Failed to fetch RSC payload").
+  if (isAuthPage && !hasSessionCookie) {
+    return NextResponse.next({ request })
+  }
+
+  // Protected routes without a session cookie: redirect without Supabase round-trip.
+  if (isProtectedRoute && !hasSessionCookie) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
+    return NextResponse.redirect(url)
+  }
+
+  // Public marketing/stock pages without a session: no auth work needed.
+  if (!hasSessionCookie && !isProtectedRoute && !isAuthPage) {
+    return NextResponse.next({ request })
+  }
+
   let supabaseResponse = NextResponse.next({
     request,
   })
@@ -35,21 +63,9 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const isProtectedRoute =
-    request.nextUrl.pathname.startsWith('/dashboard') &&
-    !request.nextUrl.pathname.startsWith('/stocks')
-
   if (!user && isProtectedRoute) {
-    // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone()
     url.pathname = '/login'
-    return NextResponse.redirect(url)
-  }
-
-  // If user is logged in, redirect them away from auth pages to the dashboard
-  if (user && (request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/signup'))) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
     return NextResponse.redirect(url)
   }
 
