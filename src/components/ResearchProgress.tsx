@@ -20,17 +20,17 @@ const STEPS = [
 
 export default function ResearchProgress({ companyName, activeNode, completedNodes }: ResearchProgressProps) {
   return (
-    <div className="w-full max-w-xl mx-auto mt-12 p-8 rounded-3xl bg-neutral-900 border border-neutral-800 shadow-2xl relative overflow-hidden">
+    <div className="w-full max-w-xl mx-auto mt-12 p-8 rounded-3xl bg-white border border-slate-200 shadow-2xl relative overflow-hidden">
       {/* Background glow effect */}
       <div className="absolute -top-32 -left-32 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
       
       <div className="flex items-center gap-4 mb-8">
-        <div className="w-12 h-12 rounded-xl bg-neutral-950 flex items-center justify-center border border-neutral-800 shadow-inner">
+        <div className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center border border-slate-200 shadow-inner">
           <Activity className="w-6 h-6 text-emerald-400 animate-pulse" />
         </div>
         <div>
-          <h2 className="text-xl font-semibold text-neutral-100">Researching {companyName}</h2>
-          <p className="text-sm text-neutral-400">Live LangGraph execution pipeline</p>
+          <h2 className="text-xl font-semibold text-slate-900">Researching {companyName}</h2>
+          <p className="text-sm text-slate-600">Live LangGraph execution pipeline</p>
         </div>
       </div>
 
@@ -61,15 +61,15 @@ export default function ResearchProgress({ companyName, activeNode, completedNod
                 <span
                   className={`text-base font-semibold ${
                     isCompleted
-                      ? "text-neutral-300 line-through decoration-neutral-800 decoration-2"
+                      ? "text-slate-700 line-through decoration-neutral-800 decoration-2"
                       : isCurrent
-                      ? "text-white font-bold"
-                      : "text-neutral-500"
+                      ? "text-slate-900 font-bold"
+                      : "text-slate-500"
                   }`}
                 >
                   {step.label}
                 </span>
-                <span className="text-xs text-neutral-500 mt-0.5">{step.sub}</span>
+                <span className="text-xs text-slate-500 mt-0.5">{step.sub}</span>
               </div>
             </div>
           );

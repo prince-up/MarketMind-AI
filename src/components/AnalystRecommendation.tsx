@@ -1,16 +1,26 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import type { AnalystData } from "@/types";
+import SourceTag from "./SourceTag";
 
 interface AnalystRecommendationProps {
   analystData: AnalystData;
 }
 
 export default function AnalystRecommendation({ analystData }: AnalystRecommendationProps) {
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoaded(true);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
   if (!analystData || analystData.numberOfAnalystOpinions === 0) {
     return (
-      <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 shadow-lg relative overflow-hidden group hover:-translate-y-1 hover:shadow-2xl hover:border-neutral-700 transition-all duration-300">
-        <h3 className="text-white font-bold mb-4 uppercase tracking-wider text-sm">Analyst Recommendation</h3>
-        <div className="text-neutral-500 text-sm py-4 text-center italic">
+      <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-lg relative overflow-hidden group hover:-translate-y-1 hover:shadow-2xl hover:border-slate-300 transition-all duration-300">
+        <h3 className="text-slate-900 font-bold mb-4 uppercase tracking-wider text-sm">Analyst Recommendation</h3>
+        <div className="text-slate-500 text-sm py-4 text-center italic">
           Analyst data unavailable.
         </div>
       </div>
@@ -31,7 +41,7 @@ export default function AnalystRecommendation({ analystData }: AnalystRecommenda
       case "sell": return "text-orange-500";
       case "strong_sell":
       case "strongsell": return "text-rose-500";
-      default: return "text-neutral-400";
+      default: return "text-slate-600";
     }
   };
 
@@ -64,14 +74,15 @@ export default function AnalystRecommendation({ analystData }: AnalystRecommenda
   const formattedKey = getFormatKey(recommendationKey);
   const colorClass = getLabelColor(recommendationKey);
   const rotation = getRotation(recommendationKey);
+  const currentRotation = isLoaded ? rotation : -90;
 
   return (
-    <div className="bg-[#131722] border border-neutral-800 rounded-3xl p-6 shadow-lg relative overflow-hidden group hover:-translate-y-1 hover:shadow-2xl hover:border-neutral-700 transition-all duration-300 h-full flex flex-col justify-between">
+    <div className="bg-[#131722] border border-slate-200 rounded-3xl p-6 shadow-lg relative overflow-hidden group hover:-translate-y-1 hover:shadow-2xl hover:border-slate-300 transition-all duration-300 h-full flex flex-col justify-between">
       
       <div className="text-center mb-6">
-        <h3 className="text-white font-bold uppercase tracking-wider text-sm mb-4">Analyst Recommendation</h3>
+        <h3 className="text-slate-900 font-bold uppercase tracking-wider text-sm mb-4">Analyst Recommendation</h3>
         <div className={`text-3xl font-black tracking-tight ${colorClass}`}>{formattedKey}</div>
-        <div className="text-[10px] text-neutral-500 mt-1">Based on {numberOfAnalystOpinions} analysts</div>
+        <div className="text-[10px] text-slate-500 mt-1">Based on {numberOfAnalystOpinions} analysts</div>
       </div>
 
       {/* SVG Arc Gauge */}
@@ -92,18 +103,18 @@ export default function AnalystRecommendation({ analystData }: AnalystRecommenda
             {/* Ticks & Labels could be added here, we keep it clean */}
             
             {/* Needle */}
-            <g style={{ transform: `rotate(${rotation}deg)`, transformOrigin: '50px 50px', transition: 'transform 1s cubic-bezier(0.22, 1, 0.36, 1)' }}>
+            <g style={{ transform: `rotate(${currentRotation}deg)`, transformOrigin: '50px 50px', transition: 'transform 1s cubic-bezier(0.22, 1, 0.36, 1)' }}>
               <polygon points="48,50 52,50 50,15" fill="#f5f5f5" />
               <circle cx="50" cy="50" r="4" fill="#f5f5f5" />
             </g>
           </svg>
           
           {/* Labels for arc */}
-          <div className="absolute top-[80%] -left-6 text-[9px] text-neutral-400 text-center w-12">Strong<br/>Sell</div>
-          <div className="absolute top-[40%] -left-2 text-[9px] text-neutral-400">Sell</div>
-          <div className="absolute top-[10%] left-1/2 -translate-x-1/2 text-[9px] text-neutral-400">Hold</div>
-          <div className="absolute top-[40%] -right-2 text-[9px] text-neutral-400">Buy</div>
-          <div className="absolute top-[80%] -right-6 text-[9px] text-neutral-400 text-center w-12">Strong<br/>Buy</div>
+          <div className="absolute top-[80%] -left-6 text-[9px] text-slate-600 text-center w-12">Strong<br/>Sell</div>
+          <div className="absolute top-[40%] -left-2 text-[9px] text-slate-600">Sell</div>
+          <div className="absolute top-[10%] left-1/2 -translate-x-1/2 text-[9px] text-slate-600">Hold</div>
+          <div className="absolute top-[40%] -right-2 text-[9px] text-slate-600">Buy</div>
+          <div className="absolute top-[80%] -right-6 text-[9px] text-slate-600 text-center w-12">Strong<br/>Buy</div>
         </div>
       </div>
 
@@ -117,22 +128,24 @@ export default function AnalystRecommendation({ analystData }: AnalystRecommenda
           { label: "Strong Sell", count: strongSell, color: "bg-rose-500" },
         ].map((item, i) => (
           <div key={i} className="flex items-center gap-3 text-xs">
-            <div className="w-16 text-neutral-400">{item.label}</div>
-            <div className="flex-1 bg-neutral-950 h-1.5 rounded-full overflow-hidden">
+            <div className="w-16 text-slate-600">{item.label}</div>
+            <div className="flex-1 bg-slate-50 h-1.5 rounded-full overflow-hidden">
               <div 
-                className={`h-full ${item.color} rounded-full transition-all duration-1000`} 
-                style={{ width: `${item.count > 0 ? Math.max((item.count / maxBar) * 100, 2) : 0}%` }}
+                className={`h-full ${item.color} rounded-full transition-all duration-1000 ease-out`} 
+                style={{ width: isLoaded ? `${item.count > 0 ? Math.max((item.count / maxBar) * 100, 2) : 0}%` : '0%' }}
               />
             </div>
-            <div className="w-4 text-right text-neutral-300 font-mono">{item.count}</div>
+            <div className="w-4 text-right text-slate-700 font-mono">{item.count}</div>
           </div>
         ))}
       </div>
 
-      <div className="flex justify-between items-center mt-6 pt-4 border-t border-neutral-800/60">
-        <span className="text-xs text-neutral-400">12 Month Price Target</span>
-        <span className="text-sm font-bold text-white font-mono">USD {targetMeanPrice.toFixed(2)}</span>
+      <div className="flex justify-between items-center mt-6 pt-4 border-t border-slate-200 mb-6">
+        <span className="text-xs text-slate-600">12 Month Price Target</span>
+        <span className="text-sm font-bold text-slate-900 font-mono">USD {targetMeanPrice.toFixed(2)}</span>
       </div>
+
+      <SourceTag sources={["Yahoo Finance (analyst consensus)"]} />
       
     </div>
   );

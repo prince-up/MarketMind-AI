@@ -81,35 +81,35 @@ export default function HelpChatWidget() {
 
       {/* Chat Panel */}
       {isOpen && (
-        <div className="w-[360px] sm:w-[380px] h-[500px] bg-neutral-900 border border-neutral-805 rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 duration-300">
+        <div className="w-[360px] sm:w-[380px] h-[500px] bg-white border border-neutral-805 rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 duration-300">
           
           {/* Header */}
-          <div className="p-4 bg-neutral-950 border-b border-neutral-800/80 flex items-center justify-between">
+          <div className="p-4 bg-slate-50 border-b border-slate-200/80 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="p-1.5 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
                 <HelpCircle className="w-4 h-4 text-emerald-400" />
               </div>
               <div>
-                <h3 className="font-bold text-sm text-white">Console Assistant</h3>
-                <span className="text-[10px] text-neutral-500">Methodology & Tool Guide</span>
+                <h3 className="font-bold text-sm text-slate-900">Console Assistant</h3>
+                <span className="text-[10px] text-slate-500">Methodology & Tool Guide</span>
               </div>
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="p-1.5 text-neutral-400 hover:text-white bg-neutral-900 rounded-lg transition-colors border border-neutral-800/60"
+              className="p-1.5 text-slate-600 hover:text-slate-900 bg-white rounded-lg transition-colors border border-slate-200"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
 
           {/* Quick Chips */}
-          <div className="p-3 bg-neutral-950/40 border-b border-neutral-800/40 flex flex-wrap gap-1.5">
+          <div className="p-3 bg-slate-50/40 border-b border-slate-200 flex flex-wrap gap-1.5">
             {CHIPS.map((chip) => (
               <button
                 key={chip}
                 onClick={() => handleSend(chip)}
                 disabled={isLoading}
-                className="text-[10px] px-2.5 py-1 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 rounded-lg transition-colors disabled:opacity-55"
+                className="text-[10px] px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-lg transition-colors disabled:opacity-55"
               >
                 {chip}
               </button>
@@ -117,7 +117,7 @@ export default function HelpChatWidget() {
           </div>
 
           {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-neutral-900/30">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-white/30">
             {messages.map((msg, i) => {
               const isAssistant = msg.role === "assistant";
               return (
@@ -128,7 +128,7 @@ export default function HelpChatWidget() {
                   <div
                     className={`max-w-[85%] rounded-2xl p-3 text-xs leading-relaxed ${
                       isAssistant
-                        ? "bg-neutral-950 text-neutral-300 border border-neutral-805"
+                        ? "bg-slate-50 text-slate-700 border border-neutral-805"
                         : "bg-emerald-500 text-neutral-950 font-medium"
                     }`}
                   >
@@ -139,7 +139,7 @@ export default function HelpChatWidget() {
             })}
             {isLoading && (
               <div className="flex justify-start">
-                <div className="bg-neutral-950 text-neutral-400 p-3 rounded-2xl border border-neutral-805 text-xs flex items-center gap-2">
+                <div className="bg-slate-50 text-slate-600 p-3 rounded-2xl border border-neutral-805 text-xs flex items-center gap-2">
                   <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-400" />
                   Generating answer...
                 </div>
@@ -151,14 +151,14 @@ export default function HelpChatWidget() {
           {/* Input Form */}
           <form
             onSubmit={handleFormSubmit}
-            className="p-3 bg-neutral-950 border-t border-neutral-800/80 flex gap-2 items-center"
+            className="p-3 bg-slate-50 border-t border-slate-200/80 flex gap-2 items-center"
           >
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask a question..."
-              className="flex-1 bg-neutral-900 border border-neutral-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500/50 transition-colors"
+              className="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-emerald-500/50 transition-colors"
               disabled={isLoading}
             />
             <button

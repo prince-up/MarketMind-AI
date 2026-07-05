@@ -1,8 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --background: #09090b; /* Zinc 950 */
-  --foreground: #fafafa; /* Zinc 50 */
+  --background: #ffffff;
+  --foreground: #44475b;
+  --brand-green: #00b386;
+  --brand-green-hover: #00926d;
+  --brand-red: #eb5b3c;
+  --text-primary: #44475b;
+  --text-muted: #7c7e8c;
+  --border-light: #e9e9eb;
+  --surface-muted: #fafafa;
+  --dark-bg: #1a1a2e;
 }
 
 @theme inline {
@@ -10,15 +18,33 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  
-  --color-brand-green: #10b981; /* Emerald 500 */
-  --color-brand-red: #ef4444; /* Red 500 */
+
+  --color-brand-green: #00b386;
+  --color-brand-green-hover: #00926d;
+  --color-brand-red: #eb5b3c;
+  --color-text-primary: #44475b;
+  --color-text-muted: #7c7e8c;
+  --color-border-light: #e9e9eb;
+  --color-surface-muted: #fafafa;
+  --color-dark-bg: #1a1a2e;
 }
 
 html, body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+  letter-spacing: 0;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid #00b386;
+  outline-offset: 2px;
 }
 
 /* Animations */
@@ -28,4 +54,32 @@ html, body {
 }
 .animate-pulse-slow {
   animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Print Styles for PDF Export */
+@media print {
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    background: #ffffff !important;
+  }
+  
+  button, 
+  #help-chat-widget,
+  .no-print {
+    display: none !important;
+  }
+
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
 }

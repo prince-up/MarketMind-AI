@@ -251,8 +251,9 @@ const fetchFinancials = async (state: typeof GraphState.State) => {
 
     let earnings: EarningsHistoryEntry[] = [];
     let analystData: AnalystData | null = null;
+    let summary: any = {};
     try {
-      const summary = await yf.quoteSummary(ticker, { modules: ['earningsHistory', 'recommendationTrend', 'financialData'] });
+      summary = await yf.quoteSummary(ticker, { modules: ['earningsHistory', 'recommendationTrend', 'financialData', 'defaultKeyStatistics'] });
       
       if (summary.earningsHistory?.history) {
         earnings = summary.earningsHistory.history
@@ -268,8 +269,8 @@ const fetchFinancials = async (state: typeof GraphState.State) => {
 
       if (summary.recommendationTrend?.trend?.[0]) {
         const trend = summary.recommendationTrend.trend[0];
-        const finData = (summary.financialData as any) || {};
-        
+        const finData = summary.financialData || {};
+    
         analystData = {
           strongBuy: trend.strongBuy ?? 0,
           buy: trend.buy ?? 0,
@@ -285,25 +286,32 @@ const fetchFinancials = async (state: typeof GraphState.State) => {
       console.warn("[fetch_financials] Failed to fetch extended yahoo finance data:", e);
     }
 
+    const finData = summary?.financialData || {};
+    const keyStats = summary?.defaultKeyStatistics || {};
+
     const rawText = [
       `Ticker: ${ticker}`,
       `Current Price: ${quote.regularMarketPrice != null ? `$${quote.regularMarketPrice}` : "N/A"}`,
       `Market Cap: ${quote.marketCap != null ? `$${(quote.marketCap / 1e9).toFixed(2)}B` : "N/A"}`,
       `P/E Ratio (Trailing): ${quote.trailingPE?.toFixed(2) ?? "N/A"}`,
       `P/E Ratio (Forward): ${quote.forwardPE?.toFixed(2) ?? "N/A"}`,
-      `52-Week High: ${quote.fiftyTwoWeekHigh != null ? `$${quote.fiftyTwoWeekHigh}` : "N/A"}`,
-      `52-Week Low: ${quote.fiftyTwoWeekLow != null ? `$${quote.fiftyTwoWeekLow}` : "N/A"}`,
       `EPS (Trailing): ${quote.epsTrailingTwelveMonths ?? "N/A"}`,
       `Dividend Yield: ${quote.trailingAnnualDividendYield != null ? `${(quote.trailingAnnualDividendYield * 100).toFixed(2)}%` : "N/A"}`,
+      `Revenue Growth: ${finData.revenueGrowth != null ? `${(finData.revenueGrowth * 100).toFixed(2)}%` : "N/A"}`,
+      `Profit Margins: ${finData.profitMargins != null ? `${(finData.profitMargins * 100).toFixed(2)}%` : "N/A"}`,
+      `Operating Margins: ${finData.operatingMargins != null ? `${(finData.operatingMargins * 100).toFixed(2)}%` : "N/A"}`,
+      `Free Cash Flow: ${finData.freeCashflow != null ? `$${(finData.freeCashflow / 1e9).toFixed(2)}B` : "N/A"}`,
+      `Total Debt: ${finData.totalDebt != null ? `$${(finData.totalDebt / 1e9).toFixed(2)}B` : "N/A"}`,
+      `Debt to Equity: ${finData.debtToEquity != null ? `${finData.debtToEquity}` : "N/A"}`,
     ].join("\n");
 
     const schema = z.object({
-      revenueGrowth: z.string().describe("Revenue growth description, e.g. '15% YoY' or 'Declining'"),
+      revenueGrowth: z.string().describe("Revenue growth description, e.g. '15.5% YoY' or 'Declining'"),
       peRatio: z.string().describe("P/E ratio assessment and what it implies"),
       marketCap: z.string().describe("Market cap figure and what tier it represents"),
-      cashFlow: z.string().describe("Cash flow assessment based on available data"),
-      debt: z.string().describe("Debt situation based on available data"),
-      profitability: z.string().describe("Profitability status"),
+      cashFlow: z.string().describe("Cash flow assessment based on available data (Free Cash Flow)"),
+      debt: z.string().describe("Debt situation based on available data (Total Debt / Debt to Equity)"),
+      profitability: z.string().describe("Profitability status (Profit Margins / Operating Margins)"),
       score: unionScoreSchema("Financial health score 0–100. 80+ = strong, 60–79 = moderate, <60 = weak. Base on actual data."),
     });
 
@@ -433,7 +441,7 @@ const analyzeCompetitors = async (state: typeof GraphState.State) => {
     const llm = getLLM().withStructuredOutput(schema);
     const result = await llm.invoke([
       new SystemMessage(
-        "You are a competitive intelligence analyst. Use ONLY the provided search results. Compare market position, strengths, weaknesses, AI leadership, pricing, and growth. Do NOT invent competitors not mentioned. Be specific and factual. All numeric fields MUST be plain numbers (e.g., 75), never strings, never text like 'Not Provided' or 'N/A'. If data is genuinely unavailable, use a reasonable default numeric estimate instead of a placeholder string."
+        "You are a competitive intelligence analyst. Use ONLY the provided search results. Compare market position, strengths, weaknesses, AI leadership, pricing, and growth. Do NOT invent competitors not mentioned. Be specific and factual. Omit optional fields (AI Leadership, Pricing, Growth) entirely if the data is not mentioned in the text. NEVER return 'none mentioned', 'not applicable', 'N/A', or placeholder text for strings. All numeric fields MUST be plain numbers (e.g., 75)."
       ),
       new HumanMessage(
         `Company: ${state.companyName}\n\nSearch Results:\n${results}\n\nProvide a structured competitive analysis comparing market position, strengths, weaknesses, AI leadership, pricing, and growth.`

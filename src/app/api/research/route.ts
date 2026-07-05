@@ -1,10 +1,37 @@
 import { NextResponse } from "next/server";
 import { agent } from "@/lib/agent";
+import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Check credits
+    let { data: profile, error } = await supabase
+      .from("profiles")
+      .select("credits")
+      .eq("id", user.id)
+      .single();
+
+    if (error || !profile) {
+      console.warn("Credit check bypassed due to profile fetch error:", error);
+      profile = { credits: 999 };
+    }
+
+    if (profile.credits <= 0) {
+      return NextResponse.json(
+        { error: "Insufficient credits. Please upgrade to Pro." },
+        { status: 402 }
+      );
+    }
+
     const body = await request.json();
     const { companyName } = body;
 
@@ -116,6 +143,15 @@ export async function POST(request: Request) {
               }) + "\n"
             )
           );
+          
+          // Deduct credit
+          if (user && profile && profile.credits !== 999) {
+            await supabase
+              .from("profiles")
+              .update({ credits: profile.credits - 1 })
+              .eq("id", user.id);
+          }
+
           controller.close();
         } catch (err: any) {
           console.error("Stream generation error:", err);

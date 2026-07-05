@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 interface ScoreGaugeProps {
   score: number;
@@ -6,6 +6,15 @@ interface ScoreGaugeProps {
 }
 
 export default function ScoreGauge({ score, className = "" }: ScoreGaugeProps) {
+  const [animatedScore, setAnimatedScore] = useState(0);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setAnimatedScore(score);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [score]);
+
   const getGradient = () => {
     if (score >= 80) return "from-emerald-600 to-emerald-400";
     if (score >= 60) return "from-amber-600 to-amber-400";
@@ -20,10 +29,10 @@ export default function ScoreGauge({ score, className = "" }: ScoreGaugeProps) {
 
   return (
     <div className={`flex items-center gap-3 w-full max-w-[150px] ${className}`}>
-      <div className="flex-1 bg-neutral-950 h-2 rounded-full overflow-hidden border border-neutral-800/60 relative">
+      <div className="flex-1 bg-slate-50 h-2 rounded-full overflow-hidden border border-slate-200 relative">
         <div
-          className={`h-full rounded-full bg-gradient-to-r ${getGradient()} transition-all duration-1000`}
-          style={{ width: `${score}%` }}
+          className={`h-full rounded-full bg-gradient-to-r ${getGradient()} transition-all duration-1000 ease-out`}
+          style={{ width: `${animatedScore}%` }}
         />
       </div>
       <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border flex-shrink-0 ${getBg()}`}>

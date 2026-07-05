@@ -9,12 +9,12 @@ interface EarningsHistoryProps {
 export default function EarningsHistory({ earnings }: EarningsHistoryProps) {
   if (!earnings || earnings.length === 0) {
     return (
-      <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 shadow-lg relative overflow-hidden group hover:-translate-y-1 hover:shadow-2xl hover:border-neutral-700 transition-all duration-300">
-        <div className="flex items-center gap-2 text-white font-bold mb-4">
+      <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-lg relative overflow-hidden group hover:-translate-y-1 hover:shadow-2xl hover:border-slate-300 transition-all duration-300">
+        <div className="flex items-center gap-2 text-slate-900 font-bold mb-4">
           <Calendar className="w-5 h-5 text-indigo-400" />
           EARNINGS HISTORY
         </div>
-        <div className="text-neutral-500 text-sm py-4 text-center italic">
+        <div className="text-slate-500 text-sm py-4 text-center italic">
           Earnings history unavailable.
         </div>
       </div>
@@ -25,8 +25,8 @@ export default function EarningsHistory({ earnings }: EarningsHistoryProps) {
   const sortedEarnings = [...earnings].sort((a, b) => new Date(b.quarter).getTime() - new Date(a.quarter).getTime());
 
   return (
-    <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 shadow-lg relative overflow-hidden group hover:-translate-y-1 hover:shadow-2xl hover:border-neutral-700 transition-all duration-300">
-      <div className="flex items-center gap-2 text-white font-bold mb-6 uppercase tracking-wider text-sm">
+    <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-lg relative overflow-hidden group hover:-translate-y-1 hover:shadow-2xl hover:border-slate-300 transition-all duration-300">
+      <div className="flex items-center gap-2 text-slate-900 font-bold mb-6 uppercase tracking-wider text-sm">
         <Calendar className="w-5 h-5 text-indigo-400" />
         Earnings History
       </div>
@@ -34,7 +34,7 @@ export default function EarningsHistory({ earnings }: EarningsHistoryProps) {
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs sm:text-sm">
           <thead>
-            <tr className="border-b border-neutral-800 text-neutral-400 font-semibold uppercase tracking-widest text-[10px]">
+            <tr className="border-b border-slate-200 text-slate-600 font-semibold uppercase tracking-widest text-[10px]">
               <th className="pb-3 font-medium">Report Date</th>
               <th className="pb-3 font-medium">Forecast / Actual</th>
               <th className="pb-3 font-medium">Difference</th>
@@ -49,15 +49,19 @@ export default function EarningsHistory({ earnings }: EarningsHistoryProps) {
               const isSurprisePositive = entry.surprisePercent >= 0;
 
               return (
-                <tr key={idx} className="hover:bg-neutral-800/30 transition-colors">
-                  <td className="py-3.5 font-medium text-neutral-200">{formattedDate}</td>
-                  <td className="py-3.5 text-neutral-300 font-mono text-xs">
-                    {entry.epsEstimate.toFixed(3)} <span className="text-neutral-500 mx-1">/</span> 
+                <tr 
+                  key={idx} 
+                  className="hover:bg-slate-100/30 transition-colors animate-in fade-in slide-in-from-bottom-2 fill-mode-both"
+                  style={{ animationDuration: '500ms', animationDelay: `${idx * 100}ms` }}
+                >
+                  <td className="py-3.5 font-medium text-slate-800">{formattedDate}</td>
+                  <td className="py-3.5 text-slate-700 font-mono text-xs">
+                    {entry.epsEstimate.toFixed(3)} <span className="text-slate-500 mx-1">/</span> 
                     <span className={isPositive ? "text-emerald-400 font-bold" : "text-rose-400 font-bold"}>
                       {entry.epsActual.toFixed(3)}
                     </span>
                   </td>
-                  <td className="py-3.5 font-mono text-xs text-neutral-300">
+                  <td className="py-3.5 font-mono text-xs text-slate-700">
                     {entry.epsDifference.toFixed(3)}
                   </td>
                   <td className="py-3.5 font-mono text-xs">
@@ -72,7 +76,7 @@ export default function EarningsHistory({ earnings }: EarningsHistoryProps) {
         </table>
       </div>
       
-      <div className="mt-4 pt-3 border-t border-neutral-800/60 text-[10px] text-neutral-500 flex justify-end cursor-pointer hover:text-neutral-300 transition-colors">
+      <div className="mt-4 pt-3 border-t border-slate-200 text-[10px] text-slate-500 flex justify-end cursor-pointer hover:text-slate-700 transition-colors">
         SEE MORE ∨
       </div>
     </div>
