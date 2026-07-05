@@ -2,7 +2,8 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Download, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { ArrowLeft, ChevronRight, Download, Home, Loader2 } from "lucide-react";
 import AppShell from "@/components/layout/AppShell";
 import StockDashboard from "@/components/StockDashboard";
 import DetailedReport from "@/components/DetailedReport";
@@ -21,6 +22,13 @@ interface StockPageClientProps {
   slug: string;
 }
 
+function formatSlugTitle(slug: string) {
+  return slug
+    .split("-")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
 export default function StockPageClient({ slug }: StockPageClientProps) {
   const router = useRouter();
   const supabase = createClient();
@@ -33,6 +41,8 @@ export default function StockPageClient({ slug }: StockPageClientProps) {
   const [credits, setCredits] = useState<number | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
   const [isMethodologyOpen, setIsMethodologyOpen] = useState(false);
+
+  const displayName = companyName || formatSlugTitle(slug);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -150,7 +160,7 @@ export default function StockPageClient({ slug }: StockPageClientProps) {
   };
 
   const aiResearchSection = (
-    <div id="ai-research" className="scroll-mt-24 pt-4">
+    <div id="ai-research" className="scroll-mt-24 pt-6">
       {researchState === "loading" && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start w-full mb-8">
           <div className="lg:col-span-1">
@@ -160,7 +170,7 @@ export default function StockPageClient({ slug }: StockPageClientProps) {
               completedNodes={completedNodes}
             />
           </div>
-          <div className="lg:col-span-2 flex items-center justify-center h-64 bg-white rounded-xl border border-[var(--border)]">
+          <div className="lg:col-span-2 flex items-center justify-center h-64 bg-white rounded-2xl border border-[var(--border)]">
             <Loader2 className="w-8 h-8 text-[var(--primary)] animate-spin" />
           </div>
         </div>
@@ -169,7 +179,9 @@ export default function StockPageClient({ slug }: StockPageClientProps) {
       {researchState === "result" && result && (
         <div className="space-y-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-lg font-semibold text-[var(--text-primary)]">AI Research Report</h2>
+            <h2 className="text-lg font-semibold text-[var(--text-primary)] tracking-tight">
+              AI Research Report
+            </h2>
             <Button variant="outline" size="sm" onClick={handleDownloadPDF}>
               <Download className="w-4 h-4" />
               Export PDF
@@ -190,11 +202,11 @@ export default function StockPageClient({ slug }: StockPageClientProps) {
       )}
 
       {researchState === "idle" && (
-        <div className="py-12 text-center border border-dashed border-[var(--border)] rounded-xl bg-[var(--surface-muted)]">
-          <p className="text-[var(--text-secondary)] text-sm mb-4">
+        <div className="py-14 text-center border border-dashed border-[var(--border)] rounded-2xl bg-white">
+          <p className="text-[var(--text-secondary)] text-sm mb-5 max-w-md mx-auto leading-relaxed">
             Run AI research to get financial health, valuation, news sentiment, and a buy/hold/pass verdict.
           </p>
-          <Button onClick={() => handleRunResearch(companyName || slug.replace(/-/g, " "))}>
+          <Button onClick={() => handleRunResearch(displayName)}>
             Run AI Research
           </Button>
         </div>
@@ -211,9 +223,31 @@ export default function StockPageClient({ slug }: StockPageClientProps) {
         onMethodologyOpen={() => setIsMethodologyOpen(true)}
         searchPlaceholder="Search stocks..."
       >
+        {/* Breadcrumbs */}
+        <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-sm mb-5">
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-1 text-[var(--text-muted)] hover:text-[var(--primary)] transition-colors"
+          >
+            <Home className="w-3.5 h-3.5" />
+            Dashboard
+          </Link>
+          <ChevronRight className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+          <Link
+            href="/#stocks"
+            className="text-[var(--text-muted)] hover:text-[var(--primary)] transition-colors"
+          >
+            Stocks
+          </Link>
+          <ChevronRight className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+          <span className="font-medium text-[var(--text-primary)] truncate max-w-[200px]">
+            {displayName}
+          </span>
+        </nav>
+
         <button
           onClick={() => router.back()}
-          className="flex items-center gap-2 text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors mb-4"
+          className="flex items-center gap-2 text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors mb-6"
         >
           <ArrowLeft className="w-4 h-4" />
           Back

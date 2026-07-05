@@ -4,8 +4,9 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import MarketingNav from "@/components/MarketingNav";
 import HeroSection from "@/components/HeroSection";
-import SocialProofStrip from "@/components/SocialProofStrip";
+import LogoCloud from "@/components/LogoCloud";
 import BentoGrid, { PricingSection } from "@/components/BentoGrid";
+import TestimonialsSection from "@/components/TestimonialsSection";
 import StockShortlistCard from "@/components/StockShortlistCard";
 import MarketingFooter from "@/components/MarketingFooter";
 import { POPULAR_STOCKS } from "@/lib/popularStocks";
@@ -16,23 +17,21 @@ export default function LandingPage() {
       <MarketingNav />
 
       <HeroSection />
-      <SocialProofStrip />
+      <LogoCloud />
       <BentoGrid />
 
-      <section id="stocks" className="py-20 md:py-28 px-4 sm:px-6 bg-[var(--surface-muted)]">
+      <section id="stocks" className="py-20 md:py-28 px-4 sm:px-6 bg-[var(--surface-muted)] scroll-mt-20">
         <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-[var(--text-primary)] tracking-tight mb-3">
-                Trending stocks
-              </h2>
-              <p className="text-[var(--text-secondary)] text-base">
+              <h2 className="section-title mb-3">Trending stocks</h2>
+              <p className="section-subtitle">
                 Click any stock to view live charts, fundamentals, and AI analysis.
               </p>
             </div>
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--primary)] hover:text-[var(--primary-hover)] shrink-0"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--primary)] hover:text-[var(--primary-hover)] shrink-0 transition-colors"
             >
               Open dashboard <ArrowRight className="w-4 h-4" />
             </Link>
@@ -46,6 +45,7 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <TestimonialsSection />
       <PricingSection />
       <MarketingFooter />
     </div>

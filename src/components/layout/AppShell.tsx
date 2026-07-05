@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Sidebar from "./Sidebar";
 import TopBar from "./TopBar";
+import MarketingFooter from "@/components/MarketingFooter";
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -11,6 +12,7 @@ interface AppShellProps {
   userName?: string | null;
   onMethodologyOpen?: () => void;
   searchPlaceholder?: string;
+  showFooter?: boolean;
 }
 
 export default function AppShell({
@@ -20,11 +22,12 @@ export default function AppShell({
   userName = null,
   onMethodologyOpen,
   searchPlaceholder,
+  showFooter = false,
 }: AppShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen flex bg-[var(--surface-muted)]">
+    <div className="min-h-screen flex app-bg">
       <Sidebar
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
@@ -45,6 +48,8 @@ export default function AppShell({
             {children}
           </div>
         </main>
+
+        {showFooter && <MarketingFooter variant="compact" />}
       </div>
     </div>
   );

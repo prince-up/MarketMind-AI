@@ -22,14 +22,12 @@ export default async function LoginPage(props: { searchParams: Promise<{ error?:
   return (
     <AuthLayout title="Welcome back" subtitle="Log in to continue your research">
       {searchParams?.error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm font-medium text-center">
-          {searchParams.error}
-        </div>
+        <div className="form-error mb-6">{searchParams.error}</div>
       )}
 
       <form className="flex flex-col gap-5">
-        <div className="space-y-1.5">
-          <label htmlFor="email" className="text-sm font-medium text-[var(--text-primary)]">
+        <div>
+          <label htmlFor="email" className="form-label">
             Email
           </label>
           <input
@@ -37,12 +35,12 @@ export default async function LoginPage(props: { searchParams: Promise<{ error?:
             name="email"
             type="email"
             required
-            className="w-full bg-white border border-[var(--border)] rounded-xl px-4 py-3 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary-muted)] transition-all placeholder:text-[var(--text-muted)]"
+            className="form-input rounded-xl"
             placeholder="you@example.com"
           />
         </div>
-        <div className="space-y-1.5">
-          <label htmlFor="password" className="text-sm font-medium text-[var(--text-primary)]">
+        <div>
+          <label htmlFor="password" className="form-label">
             Password
           </label>
           <input
@@ -50,14 +48,14 @@ export default async function LoginPage(props: { searchParams: Promise<{ error?:
             name="password"
             type="password"
             required
-            className="w-full bg-white border border-[var(--border)] rounded-xl px-4 py-3 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary-muted)] transition-all placeholder:text-[var(--text-muted)]"
+            className="form-input rounded-xl"
             placeholder="••••••••"
           />
         </div>
 
         <button
           formAction={login}
-          className="w-full py-3 mt-1 bg-[var(--primary)] text-white font-semibold rounded-xl hover:bg-[var(--primary-hover)] transition-colors"
+          className="w-full py-3.5 mt-1 bg-[var(--primary)] text-white font-semibold rounded-xl hover:bg-[var(--primary-hover)] transition-colors shadow-sm shadow-[var(--primary)]/20"
         >
           Log in
         </button>
