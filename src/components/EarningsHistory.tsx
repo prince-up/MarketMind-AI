@@ -9,10 +9,10 @@ interface EarningsHistoryProps {
 export default function EarningsHistory({ earnings }: EarningsHistoryProps) {
   if (!earnings || earnings.length === 0) {
     return (
-      <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-lg relative overflow-hidden group hover:-translate-y-1 hover:shadow-2xl hover:border-slate-300 transition-all duration-300">
-        <div className="flex items-center gap-2 text-slate-900 font-bold mb-4">
-          <Calendar className="w-5 h-5 text-indigo-400" />
-          EARNINGS HISTORY
+      <div className="report-card">
+        <div className="report-card-title mb-4">
+          <Calendar className="w-5 h-5 text-indigo-500" />
+          Earnings History
         </div>
         <div className="text-slate-500 text-sm py-4 text-center italic">
           Earnings history unavailable.
@@ -21,51 +21,53 @@ export default function EarningsHistory({ earnings }: EarningsHistoryProps) {
     );
   }
 
-  // Sort by date descending (newest first)
-  const sortedEarnings = [...earnings].sort((a, b) => new Date(b.quarter).getTime() - new Date(a.quarter).getTime());
+  const sortedEarnings = [...earnings].sort(
+    (a, b) => new Date(b.quarter).getTime() - new Date(a.quarter).getTime()
+  );
 
   return (
-    <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-lg relative overflow-hidden group hover:-translate-y-1 hover:shadow-2xl hover:border-slate-300 transition-all duration-300">
-      <div className="flex items-center gap-2 text-slate-900 font-bold mb-6 uppercase tracking-wider text-sm">
-        <Calendar className="w-5 h-5 text-indigo-400" />
+    <div className="report-card">
+      <div className="report-card-title mb-4">
+        <Calendar className="w-5 h-5 text-indigo-500" />
         Earnings History
       </div>
-      
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs sm:text-sm">
+
+      <div className="overflow-x-auto -mx-1 px-1 flex-1">
+        <table className="w-full min-w-[420px] text-left text-sm">
           <thead>
-            <tr className="border-b border-slate-200 text-slate-600 font-semibold uppercase tracking-widest text-[10px]">
-              <th className="pb-3 font-medium">Report Date</th>
-              <th className="pb-3 font-medium">Forecast / Actual</th>
-              <th className="pb-3 font-medium">Difference</th>
-              <th className="pb-3 font-medium">Surprise %</th>
+            <tr className="border-b border-slate-200 text-slate-500 text-xs font-semibold">
+              <th className="pb-2.5 pr-4 font-medium">Report Date</th>
+              <th className="pb-2.5 pr-4 font-medium">Forecast / Actual</th>
+              <th className="pb-2.5 pr-4 font-medium">Difference</th>
+              <th className="pb-2.5 font-medium">Surprise %</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-neutral-800/60">
+          <tbody className="divide-y divide-slate-100">
             {sortedEarnings.map((entry, idx) => {
               const dateObj = new Date(entry.quarter);
-              const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+              const formattedDate = dateObj.toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              });
               const isPositive = entry.epsDifference >= 0;
               const isSurprisePositive = entry.surprisePercent >= 0;
 
               return (
-                <tr 
-                  key={idx} 
-                  className="hover:bg-slate-100/30 transition-colors animate-in fade-in slide-in-from-bottom-2 fill-mode-both"
-                  style={{ animationDuration: '500ms', animationDelay: `${idx * 100}ms` }}
-                >
-                  <td className="py-3.5 font-medium text-slate-800">{formattedDate}</td>
-                  <td className="py-3.5 text-slate-700 font-mono text-xs">
-                    {entry.epsEstimate.toFixed(3)} <span className="text-slate-500 mx-1">/</span> 
-                    <span className={isPositive ? "text-emerald-400 font-bold" : "text-rose-400 font-bold"}>
+                <tr key={idx} className="hover:bg-slate-50/80 transition-colors">
+                  <td className="py-3 pr-4 font-medium text-slate-800 whitespace-nowrap">{formattedDate}</td>
+                  <td className="py-3 pr-4 text-slate-700 font-mono text-xs whitespace-nowrap">
+                    {entry.epsEstimate.toFixed(3)}
+                    <span className="text-slate-400 mx-1">/</span>
+                    <span className={isPositive ? "text-emerald-600 font-semibold" : "text-rose-600 font-semibold"}>
                       {entry.epsActual.toFixed(3)}
                     </span>
                   </td>
-                  <td className="py-3.5 font-mono text-xs text-slate-700">
+                  <td className="py-3 pr-4 font-mono text-xs text-slate-700">
                     {entry.epsDifference.toFixed(3)}
                   </td>
-                  <td className="py-3.5 font-mono text-xs">
-                    <span className={isSurprisePositive ? "text-emerald-400" : "text-rose-400"}>
+                  <td className="py-3 font-mono text-xs">
+                    <span className={isSurprisePositive ? "text-emerald-600" : "text-rose-600"}>
                       {(entry.surprisePercent * 100).toFixed(2)}%
                     </span>
                   </td>
@@ -74,10 +76,6 @@ export default function EarningsHistory({ earnings }: EarningsHistoryProps) {
             })}
           </tbody>
         </table>
-      </div>
-      
-      <div className="mt-4 pt-3 border-t border-slate-200 text-[10px] text-slate-500 flex justify-end cursor-pointer hover:text-slate-700 transition-colors">
-        SEE MORE ∨
       </div>
     </div>
   );

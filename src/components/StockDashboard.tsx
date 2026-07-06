@@ -502,14 +502,6 @@ export default function StockDashboard({
             </div>
           )}
 
-          {/* AI RESEARCH SECTION */}
-          {aiResearchSection && (
-            <div className="mb-12">
-              <h2 className="text-[20px] font-semibold text-[#44475b] mb-6">AI Research</h2>
-              {aiResearchSection}
-            </div>
-          )}
-
         </div>
 
         {/* RIGHT COLUMN (Spans 4) */}
@@ -576,6 +568,13 @@ export default function StockDashboard({
         </div>
 
       </div>
+
+      {/* AI RESEARCH — full width below dashboard grid */}
+      {aiResearchSection && (
+        <div className="w-full mt-10 pt-10 border-t border-slate-200">
+          {aiResearchSection}
+        </div>
+      )}
 
     </section>
   );

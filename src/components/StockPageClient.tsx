@@ -160,9 +160,9 @@ export default function StockPageClient({ slug }: StockPageClientProps) {
   };
 
   const aiResearchSection = (
-    <div id="ai-research" className="scroll-mt-24 pt-6">
+    <div id="ai-research" className="report-section scroll-mt-24 w-full">
       {researchState === "loading" && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start w-full mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start w-full">
           <div className="lg:col-span-1">
             <ResearchProgress
               companyName={companyName}
@@ -170,16 +170,16 @@ export default function StockPageClient({ slug }: StockPageClientProps) {
               completedNodes={completedNodes}
             />
           </div>
-          <div className="lg:col-span-2 flex items-center justify-center h-64 bg-white rounded-2xl border border-[var(--border)]">
+          <div className="lg:col-span-2 flex items-center justify-center h-64 saas-card">
             <Loader2 className="w-8 h-8 text-[var(--primary)] animate-spin" />
           </div>
         </div>
       )}
 
       {researchState === "result" && result && (
-        <div className="space-y-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-lg font-semibold text-[var(--text-primary)] tracking-tight">
+        <div className="space-y-6 w-full">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-xl font-semibold text-[var(--text-primary)] tracking-tight">
               AI Research Report
             </h2>
             <Button variant="outline" size="sm" onClick={handleDownloadPDF}>
@@ -202,7 +202,7 @@ export default function StockPageClient({ slug }: StockPageClientProps) {
       )}
 
       {researchState === "idle" && (
-        <div className="py-14 text-center border border-dashed border-[var(--border)] rounded-2xl bg-white">
+        <div className="py-12 text-center border border-dashed border-[var(--border)] rounded-xl bg-white">
           <p className="text-[var(--text-secondary)] text-sm mb-5 max-w-md mx-auto leading-relaxed">
             Run AI research to get financial health, valuation, news sentiment, and a buy/hold/pass verdict.
           </p>

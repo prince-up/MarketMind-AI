@@ -9,9 +9,7 @@ export default function ScoreGauge({ score, className = "" }: ScoreGaugeProps) {
   const [animatedScore, setAnimatedScore] = useState(0);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setAnimatedScore(score);
-    }, 100);
+    const timer = setTimeout(() => setAnimatedScore(score), 100);
     return () => clearTimeout(timer);
   }, [score]);
 
@@ -22,14 +20,14 @@ export default function ScoreGauge({ score, className = "" }: ScoreGaugeProps) {
   };
 
   const getBg = () => {
-    if (score >= 80) return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
-    if (score >= 60) return "bg-amber-500/10 text-amber-400 border-amber-500/20";
-    return "bg-rose-500/10 text-rose-400 border-rose-500/20";
+    if (score >= 80) return "bg-emerald-50 text-emerald-700 border-emerald-200";
+    if (score >= 60) return "bg-amber-50 text-amber-700 border-amber-200";
+    return "bg-rose-50 text-rose-700 border-rose-200";
   };
 
   return (
-    <div className={`flex items-center gap-3 w-full max-w-[150px] ${className}`}>
-      <div className="flex-1 bg-slate-50 h-2 rounded-full overflow-hidden border border-slate-200 relative">
+    <div className={`flex items-center gap-2 min-w-[100px] max-w-[140px] ${className}`}>
+      <div className="flex-1 bg-slate-100 h-1.5 rounded-full overflow-hidden min-w-[60px]">
         <div
           className={`h-full rounded-full bg-gradient-to-r ${getGradient()} transition-all duration-1000 ease-out`}
           style={{ width: `${animatedScore}%` }}

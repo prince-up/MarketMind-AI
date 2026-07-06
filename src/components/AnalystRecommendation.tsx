@@ -10,16 +10,14 @@ export default function AnalystRecommendation({ analystData }: AnalystRecommenda
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoaded(true);
-    }, 100);
+    const timer = setTimeout(() => setIsLoaded(true), 100);
     return () => clearTimeout(timer);
   }, []);
 
   if (!analystData || analystData.numberOfAnalystOpinions === 0) {
     return (
-      <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-lg relative overflow-hidden group hover:-translate-y-1 hover:shadow-2xl hover:border-slate-300 transition-all duration-300">
-        <h3 className="text-slate-900 font-bold mb-4 uppercase tracking-wider text-sm">Analyst Recommendation</h3>
+      <div className="report-card">
+        <h3 className="report-card-title mb-4">Analyst Recommendation</h3>
         <div className="text-slate-500 text-sm py-4 text-center italic">
           Analyst data unavailable.
         </div>
@@ -29,18 +27,17 @@ export default function AnalystRecommendation({ analystData }: AnalystRecommenda
 
   const { strongBuy, buy, hold, sell, strongSell, recommendationKey, targetMeanPrice, numberOfAnalystOpinions } = analystData;
 
-  const total = strongBuy + buy + hold + sell + strongSell;
   const maxBar = Math.max(strongBuy, buy, hold, sell, strongSell, 1);
 
   const getLabelColor = (key: string) => {
     switch (key.toLowerCase()) {
       case "strong_buy":
-      case "strongbuy": return "text-emerald-400";
+      case "strongbuy": return "text-emerald-600";
       case "buy": return "text-emerald-500";
-      case "hold": return "text-amber-400";
+      case "hold": return "text-amber-600";
       case "sell": return "text-orange-500";
       case "strong_sell":
-      case "strongsell": return "text-rose-500";
+      case "strongsell": return "text-rose-600";
       default: return "text-slate-600";
     }
   };
@@ -77,49 +74,35 @@ export default function AnalystRecommendation({ analystData }: AnalystRecommenda
   const currentRotation = isLoaded ? rotation : -90;
 
   return (
-    <div className="bg-[#131722] border border-slate-200 rounded-3xl p-6 shadow-lg relative overflow-hidden group hover:-translate-y-1 hover:shadow-2xl hover:border-slate-300 transition-all duration-300 h-full flex flex-col justify-between">
-      
-      <div className="text-center mb-6">
-        <h3 className="text-slate-900 font-bold uppercase tracking-wider text-sm mb-4">Analyst Recommendation</h3>
-        <div className={`text-3xl font-black tracking-tight ${colorClass}`}>{formattedKey}</div>
-        <div className="text-[10px] text-slate-500 mt-1">Based on {numberOfAnalystOpinions} analysts</div>
+    <div className="report-card bg-slate-900 border-slate-700 text-white">
+      <div className="text-center mb-4">
+        <h3 className="text-sm font-semibold text-slate-300 mb-2">Analyst Recommendation</h3>
+        <div className={`text-2xl font-bold tracking-tight ${colorClass}`}>{formattedKey}</div>
+        <div className="text-xs text-slate-400 mt-1">Based on {numberOfAnalystOpinions} analysts</div>
       </div>
 
-      {/* SVG Arc Gauge */}
-      <div className="relative w-full flex justify-center items-center my-4">
-        <div className="relative w-48 h-24">
-          <svg viewBox="0 0 100 50" className="w-full h-full drop-shadow-md">
-            {/* Arc background segments */}
-            {/* Strong Sell */}
+      <div className="relative w-full flex justify-center items-center my-2 flex-1">
+        <div className="relative w-44 h-24">
+          <svg viewBox="0 0 100 50" className="w-full h-full">
             <path d="M 10 50 A 40 40 0 0 1 21.7 21.7" fill="none" stroke="#f43f5e" strokeWidth="3" strokeLinecap="round" />
-            {/* Sell */}
             <path d="M 23.5 19.5 A 40 40 0 0 1 45 10.5" fill="none" stroke="#f97316" strokeWidth="3" strokeLinecap="round" />
-            {/* Hold */}
             <path d="M 47 10.2 A 40 40 0 0 1 53 10.2" fill="none" stroke="#fbbf24" strokeWidth="3" strokeLinecap="round" />
             <path d="M 55 10.5 A 40 40 0 0 1 76.5 19.5" fill="none" stroke="#fbbf24" strokeWidth="3" strokeLinecap="round" />
-            {/* Buy */}
             <path d="M 78.3 21.7 A 40 40 0 0 1 90 50" fill="none" stroke="#34d399" strokeWidth="3" strokeLinecap="round" />
-            
-            {/* Ticks & Labels could be added here, we keep it clean */}
-            
-            {/* Needle */}
-            <g style={{ transform: `rotate(${currentRotation}deg)`, transformOrigin: '50px 50px', transition: 'transform 1s cubic-bezier(0.22, 1, 0.36, 1)' }}>
-              <polygon points="48,50 52,50 50,15" fill="#f5f5f5" />
-              <circle cx="50" cy="50" r="4" fill="#f5f5f5" />
+            <g style={{ transform: `rotate(${currentRotation}deg)`, transformOrigin: "50px 50px", transition: "transform 1s cubic-bezier(0.22, 1, 0.36, 1)" }}>
+              <polygon points="48,50 52,50 50,15" fill="#f1f5f9" />
+              <circle cx="50" cy="50" r="4" fill="#f1f5f9" />
             </g>
           </svg>
-          
-          {/* Labels for arc */}
-          <div className="absolute top-[80%] -left-6 text-[9px] text-slate-600 text-center w-12">Strong<br/>Sell</div>
-          <div className="absolute top-[40%] -left-2 text-[9px] text-slate-600">Sell</div>
-          <div className="absolute top-[10%] left-1/2 -translate-x-1/2 text-[9px] text-slate-600">Hold</div>
-          <div className="absolute top-[40%] -right-2 text-[9px] text-slate-600">Buy</div>
-          <div className="absolute top-[80%] -right-6 text-[9px] text-slate-600 text-center w-12">Strong<br/>Buy</div>
+          <div className="absolute top-[80%] -left-6 text-[9px] text-slate-500 text-center w-12">Strong<br/>Sell</div>
+          <div className="absolute top-[40%] -left-2 text-[9px] text-slate-500">Sell</div>
+          <div className="absolute top-[10%] left-1/2 -translate-x-1/2 text-[9px] text-slate-500">Hold</div>
+          <div className="absolute top-[40%] -right-2 text-[9px] text-slate-500">Buy</div>
+          <div className="absolute top-[80%] -right-6 text-[9px] text-slate-500 text-center w-12">Strong<br/>Buy</div>
         </div>
       </div>
 
-      {/* Bar charts breakdown */}
-      <div className="space-y-2 mt-6">
+      <div className="space-y-2 mt-4">
         {[
           { label: "Strong Buy", count: strongBuy, color: "bg-emerald-400" },
           { label: "Buy", count: buy, color: "bg-emerald-500" },
@@ -128,25 +111,26 @@ export default function AnalystRecommendation({ analystData }: AnalystRecommenda
           { label: "Strong Sell", count: strongSell, color: "bg-rose-500" },
         ].map((item, i) => (
           <div key={i} className="flex items-center gap-3 text-xs">
-            <div className="w-16 text-slate-600">{item.label}</div>
-            <div className="flex-1 bg-slate-50 h-1.5 rounded-full overflow-hidden">
-              <div 
-                className={`h-full ${item.color} rounded-full transition-all duration-1000 ease-out`} 
-                style={{ width: isLoaded ? `${item.count > 0 ? Math.max((item.count / maxBar) * 100, 2) : 0}%` : '0%' }}
+            <div className="w-16 text-slate-400 shrink-0">{item.label}</div>
+            <div className="flex-1 bg-slate-800 h-1.5 rounded-full overflow-hidden">
+              <div
+                className={`h-full ${item.color} rounded-full transition-all duration-1000 ease-out`}
+                style={{ width: isLoaded ? `${item.count > 0 ? Math.max((item.count / maxBar) * 100, 2) : 0}%` : "0%" }}
               />
             </div>
-            <div className="w-4 text-right text-slate-700 font-mono">{item.count}</div>
+            <div className="w-4 text-right text-slate-300 font-mono">{item.count}</div>
           </div>
         ))}
       </div>
 
-      <div className="flex justify-between items-center mt-6 pt-4 border-t border-slate-200 mb-6">
-        <span className="text-xs text-slate-600">12 Month Price Target</span>
-        <span className="text-sm font-bold text-slate-900 font-mono">USD {targetMeanPrice.toFixed(2)}</span>
+      <div className="flex justify-between items-center mt-4 pt-4 border-t border-slate-700">
+        <span className="text-xs text-slate-400">12 Month Price Target</span>
+        <span className="text-sm font-bold text-white font-mono">USD {targetMeanPrice.toFixed(2)}</span>
       </div>
 
-      <SourceTag sources={["Yahoo Finance (analyst consensus)"]} />
-      
+      <div className="report-card-footer [&_.source-tag-label]:text-slate-500 [&_.source-tag-pill]:bg-slate-800 [&_.source-tag-pill]:border-slate-600 [&_.source-tag-pill]:text-slate-300">
+        <SourceTag sources={["Yahoo Finance (analyst consensus)"]} />
+      </div>
     </div>
   );
 }
