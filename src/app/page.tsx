@@ -6,7 +6,6 @@ import MarketingNav from "@/components/MarketingNav";
 import HeroSection from "@/components/HeroSection";
 import LogoCloud from "@/components/LogoCloud";
 import BentoGrid, { PricingSection } from "@/components/BentoGrid";
-import TestimonialsSection from "@/components/TestimonialsSection";
 import StockShortlistCard from "@/components/StockShortlistCard";
 import MarketingFooter from "@/components/MarketingFooter";
 import { POPULAR_STOCKS } from "@/lib/popularStocks";
@@ -45,7 +44,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <TestimonialsSection />
       <PricingSection />
       <MarketingFooter />
     </div>
