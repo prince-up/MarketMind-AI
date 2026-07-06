@@ -166,7 +166,7 @@ export default function DetailedReport({ report }: DetailedReportProps) {
                 <ul className="space-y-1.5">
                   {(val.positives ?? []).map((p, i) => (
                     <li key={i} className="text-sm text-slate-700 flex items-start gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 flex-shrink-0" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--primary)] mt-1.5 flex-shrink-0" />
                       <span>{p}</span>
                     </li>
                   ))}

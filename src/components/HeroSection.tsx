@@ -51,7 +51,7 @@ function DashboardPreview() {
                 <div className="flex items-center justify-between mt-1">
                   <span className="text-[10px] text-[var(--text-muted)]">{s.ticker}</span>
                   <span
-                    className={`text-[10px] font-semibold ${s.up ? "text-[var(--primary)]" : "text-red-500"}`}
+                    className={`text-[10px] font-semibold ${s.up ? "text-[var(--buy)]" : "text-[var(--sell)]"}`}
                   >
                     {s.change}
                   </span>
@@ -97,7 +97,7 @@ export default function HeroSection() {
             <h1 className="text-4xl sm:text-5xl lg:text-[3.75rem] font-bold text-[var(--text-primary)] tracking-tight leading-[1.06] mb-6">
               Research stocks
               <br />
-              <span className="bg-gradient-to-r from-[var(--primary)] to-emerald-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] bg-clip-text text-transparent">
                 with confidence
               </span>
             </h1>

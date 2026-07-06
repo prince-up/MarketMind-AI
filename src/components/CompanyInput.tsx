@@ -68,8 +68,8 @@ export default function CompanyInput({
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] w-full max-w-2xl mx-auto px-4 text-center">
-      <div className="inline-flex items-center gap-2 px-3 py-1 mb-8 text-sm text-[#44475b] bg-[#00b386]/5 border border-[#00b386]/20 rounded-full">
-        <Sparkles className="w-4 h-4 text-[#00b386]" />
+      <div className="inline-flex items-center gap-2 px-3 py-1 mb-8 text-sm text-[var(--text-primary)] bg-[var(--primary-muted)] border border-[color-mix(in_srgb,var(--primary)_20%,transparent)] rounded-full">
+        <Sparkles className="w-4 h-4 text-[var(--primary)]" />
         <span>AI-Powered Insights</span>
       </div>
 
@@ -82,19 +82,19 @@ export default function CompanyInput({
       </p>
 
       <form onSubmit={handleSubmit} className="w-full relative flex items-center group">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#7c7e8c] group-focus-within:text-[#00b386] transition-colors" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-muted)] group-focus-within:text-[var(--primary)] transition-colors" />
         <input
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="e.g. Tesla, Apple, Zomato..."
-          className="w-full h-14 pl-12 pr-32 bg-white border border-[#e9e9eb] rounded-2xl text-lg text-[#44475b] focus:outline-none focus:ring-2 focus:ring-[#00b386]/20 focus:border-[#00b386] transition-all placeholder:text-[#7c7e8c] shadow-sm"
+          className="w-full h-14 pl-12 pr-32 bg-white border border-[var(--border)] rounded-2xl text-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary-muted)] focus:border-[var(--primary)] transition-all placeholder:text-[var(--text-muted)] shadow-sm"
         />
         <div className="absolute inset-y-1.5 right-1.5 flex items-center">
           <button
             type="submit"
             disabled={!query.trim()}
-            className="h-full px-6 bg-[#00b386] hover:bg-[#00926d] text-white font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="h-full px-6 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {submitLabel}
           </button>
@@ -108,7 +108,7 @@ export default function CompanyInput({
             <button
               key={company}
               onClick={() => handleChipClick(company)}
-              className="px-4 py-2 text-sm text-[#44475b] bg-white border border-[#e9e9eb] rounded-lg hover:border-[#00b386]/40 hover:text-[#00b386] transition-colors"
+              className="px-4 py-2 text-sm text-[var(--text-primary)] bg-white border border-[var(--border)] rounded-lg hover:border-[color-mix(in_srgb,var(--primary)_40%,var(--border))] hover:text-[var(--primary)] transition-colors"
             >
               {company}
             </button>

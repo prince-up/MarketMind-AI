@@ -27,34 +27,34 @@ function PhoneMockup() {
                   <div className="text-xs font-bold text-[#44475b]">{s.name}</div>
                   <div className="text-[10px] text-[#44475b]/60 font-mono">{s.price}</div>
                 </div>
-                <span className={`text-[10px] font-semibold ${s.up ? "text-[#00b386]" : "text-[#eb5b3c]"}`}>
+                <span className={`text-[10px] font-semibold ${s.up ? "text-[var(--buy)]" : "text-[var(--sell)]"}`}>
                   {s.chg}
                 </span>
               </div>
             ))}
           </div>
 
-          {/* Green buy order card */}
-          <div className="bg-[#c8e6a0] rounded-2xl p-4 shadow-sm">
+          {/* Research order card */}
+          <div className="bg-blue-50 rounded-2xl p-4 shadow-sm border border-blue-100">
             <div className="flex items-center gap-2 mb-2">
-              <TrendingUp className="w-4 h-4 text-[#00b386]" />
+              <TrendingUp className="w-4 h-4 text-[var(--primary)]" />
               <span className="text-xs font-bold text-[#44475b]">Research Order</span>
             </div>
-            <div className="bg-white/60 rounded-xl p-3">
+            <div className="bg-white/80 rounded-xl p-3">
               <div className="text-[10px] text-[#44475b]/60 mb-1">Stock</div>
               <div className="text-sm font-bold text-[#44475b]">Apple Inc.</div>
               <div className="flex justify-between mt-2 pt-2 border-t border-[#44475b]/10">
                 <div>
                   <div className="text-[10px] text-[#44475b]/60">AI Score</div>
-                  <div className="text-sm font-bold text-[#00b386]">82/100</div>
+                  <div className="text-sm font-bold text-[var(--primary)]">82/100</div>
                 </div>
                 <div className="text-right">
                   <div className="text-[10px] text-[#44475b]/60">Verdict</div>
-                  <div className="text-sm font-bold text-[#44475b]">Buy</div>
+                  <div className="text-sm font-bold text-[var(--buy)]">Buy</div>
                 </div>
               </div>
             </div>
-            <button className="w-full mt-3 py-2 bg-[#00b386] text-white text-xs font-bold rounded-xl">
+            <button className="w-full mt-3 py-2 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white text-xs font-bold rounded-xl transition-colors">
               Run AI Research
             </button>
           </div>
@@ -71,7 +71,7 @@ function PhoneMockup() {
 export default function StockResearchSection() {
   return (
     <section className="py-20 md:py-28 px-4 sm:px-6 bg-[#0a0a0a] relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#00b386]/5 rounded-full blur-[150px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[var(--primary)]/5 rounded-full blur-[150px] pointer-events-none" />
 
       <div className="max-w-6xl mx-auto relative">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">

@@ -31,7 +31,7 @@ export default function MethodologyPanel({ isOpen, onClose }: MethodologyPanelPr
           {/* Section 1 */}
           <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
             <h3 className="font-bold text-slate-900 mb-2 flex items-center gap-2">
-              <Scale className="w-4 h-4 text-emerald-400" /> Weighted Confidence Formula
+              <Scale className="w-4 h-4 text-[var(--primary)]" /> Weighted Confidence Formula
             </h3>
             <p className="text-slate-600 mb-3">
               The aggregate confidence score is not an AI guess. It is calculated deterministically by combining multi-agent scores using weighted ratings:

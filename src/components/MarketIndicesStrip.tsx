@@ -34,8 +34,8 @@ export default function MarketIndicesStrip() {
     <section className="py-4 border-y border-[#e9e9eb] bg-[#1a1a2e] overflow-hidden">
       <div className="flex items-center gap-2 px-4 mb-2">
         <span className="relative flex h-2 w-2">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00b386] opacity-75" />
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00b386]" />
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--buy)] opacity-75" />
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--buy)]" />
         </span>
         <span className="text-xs font-semibold text-white/70 uppercase tracking-wider">Live Markets</span>
       </div>
@@ -53,7 +53,7 @@ export default function MarketIndicesStrip() {
               </div>
               <div
                 className={`flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-lg ${
-                  isPositive ? "text-[#00b386] bg-[#00b386]/15" : "text-[#eb5b3c] bg-[#eb5b3c]/15"
+                  isPositive ? "text-[var(--buy)] bg-[var(--buy-muted)]" : "text-[var(--sell)] bg-[var(--sell-muted)]"
                 }`}
               >
                 {isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}

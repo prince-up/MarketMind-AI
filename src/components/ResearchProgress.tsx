@@ -22,11 +22,11 @@ export default function ResearchProgress({ companyName, activeNode, completedNod
   return (
     <div className="w-full max-w-xl mx-auto mt-12 p-8 rounded-3xl bg-white border border-slate-200 shadow-2xl relative overflow-hidden">
       {/* Background glow effect */}
-      <div className="absolute -top-32 -left-32 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -top-32 -left-32 w-64 h-64 bg-[var(--primary)]/10 rounded-full blur-3xl pointer-events-none" />
       
       <div className="flex items-center gap-4 mb-8">
-        <div className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center border border-slate-200 shadow-inner">
-          <Activity className="w-6 h-6 text-emerald-400 animate-pulse" />
+        <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center border border-blue-100 shadow-inner">
+          <Activity className="w-6 h-6 text-[var(--primary)] animate-pulse" />
         </div>
         <div>
           <h2 className="text-xl font-semibold text-slate-900">Researching {companyName}</h2>
@@ -49,9 +49,9 @@ export default function ResearchProgress({ companyName, activeNode, completedNod
             >
               <div className="relative flex items-center justify-center w-6 h-6 mt-1 flex-shrink-0">
                 {isCompleted ? (
-                  <CheckCircle2 className="w-6 h-6 text-emerald-400 fill-emerald-500/10" />
+                  <CheckCircle2 className="w-6 h-6 text-[var(--primary)] fill-[var(--primary-muted)]" />
                 ) : isCurrent ? (
-                  <Loader2 className="w-5 h-5 text-emerald-400 animate-spin" />
+                  <Loader2 className="w-5 h-5 text-[var(--primary)] animate-spin" />
                 ) : (
                   <div className="w-2 h-2 rounded-full bg-neutral-600" />
                 )}
