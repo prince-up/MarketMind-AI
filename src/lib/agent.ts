@@ -12,7 +12,13 @@ import type {
   ValuationAnalysis,
   EarningsHistoryEntry,
   AnalystData,
+  BullAnalysis,
+  BearAnalysis,
+  JudgeAnalysis,
 } from "@/types";
+import { runBullAgent, FALLBACK_BULL } from "@/lib/agents/bullAgent";
+import { runBearAgent, FALLBACK_BEAR } from "@/lib/agents/bearAgent";
+import { runJudgeAgent, FALLBACK_JUDGE } from "@/lib/agents/judgeAgent";
 
 // ─── Yahoo Finance instance ───────────────────────────────────────────────────
 const yf = new YahooFinance();
@@ -61,6 +67,18 @@ export const GraphState = Annotation.Root({
     default: () => null,
   }),
   valuationData: Annotation<ValuationAnalysis | null>({
+    reducer: (_, b) => b,
+    default: () => null,
+  }),
+  bullData: Annotation<BullAnalysis | null>({
+    reducer: (_, b) => b,
+    default: () => null,
+  }),
+  bearData: Annotation<BearAnalysis | null>({
+    reducer: (_, b) => b,
+    default: () => null,
+  }),
+  judgeData: Annotation<JudgeAnalysis | null>({
     reducer: (_, b) => b,
     default: () => null,
   }),
@@ -563,7 +581,34 @@ const evaluateValuation = async (state: typeof GraphState.State) => {
   }
 };
 
-// ─── Node 6: final_decision ───────────────────────────────────────────────────
+// ─── Node 6a: bull_agent (parallel branch) ────────────────────────────────────
+const bullAgentNode = async (state: typeof GraphState.State) => {
+  const result = await runBullAgent(state);
+  return { bullData: result };
+};
+
+// ─── Node 6b: bear_agent (parallel branch) ────────────────────────────────────
+const bearAgentNode = async (state: typeof GraphState.State) => {
+  const result = await runBearAgent(state);
+  return { bearData: result };
+};
+
+// ─── Node 6c: judge_agent (waits for bull + bear) ─────────────────────────────
+const judgeAgentNode = async (state: typeof GraphState.State) => {
+  const result = await runJudgeAgent({
+    companyName: state.companyName,
+    financialData: state.financialData,
+    newsData: state.newsData,
+    competitorData: state.competitorData,
+    riskData: state.riskData,
+    valuationData: state.valuationData,
+    bullData: state.bullData ?? FALLBACK_BULL,
+    bearData: state.bearData ?? FALLBACK_BEAR,
+  });
+  return { judgeData: result };
+};
+
+// ─── Node 7: final_decision ───────────────────────────────────────────────────
 const finalDecision = async (state: typeof GraphState.State) => {
   console.log(`[final_decision] Generating recommendation for: "${state.companyName}"`);
 
@@ -572,6 +617,7 @@ const finalDecision = async (state: typeof GraphState.State) => {
   const comp = state.competitorData;
   const risk = state.riskData;
   const val = state.valuationData;
+  const judge = state.judgeData;
 
   // ── Deterministic weighted confidence (never LLM-invented) ────────────────
   const financialScore = fin?.score ?? 50;
@@ -581,14 +627,18 @@ const finalDecision = async (state: typeof GraphState.State) => {
   const riskScore = risk?.riskScore ?? 50;        // higher = worse; inverted below
   const valuationScore = val?.score ?? 50;
   const competitorScore = comp?.score ?? 50;
+  const judgeScore = judge?.investmentScore ?? 50;
+  const judgeConfidence = judge?.confidence ?? 50;
 
-  // weighted scores
+  // weighted scores — blend pipeline scores with debate judge score
   const rawConfidence =
-    financialScore * 0.30 +
-    newsSentimentScore * 0.20 +
-    (100 - riskScore) * 0.20 +
-    valuationScore * 0.20 +
-    competitorScore * 0.10;
+    financialScore * 0.25 +
+    newsSentimentScore * 0.15 +
+    (100 - riskScore) * 0.15 +
+    valuationScore * 0.15 +
+    competitorScore * 0.10 +
+    judgeScore * 0.10 +
+    judgeConfidence * 0.10;
 
   // Clamp to 10–99 so it's never 0 and never a false certainty of 100
   const confidence = Math.max(10, Math.min(99, Math.round(rawConfidence)));
@@ -601,6 +651,19 @@ const finalDecision = async (state: typeof GraphState.State) => {
       `Risk Level: ${risk?.level ?? "Medium"} (risk score ${riskScore}/100)`,
       `Valuation: ${val?.valuation ?? "Fairly Valued"} (attractiveness ${valuationScore}/100)`,
       `Calculated Confidence: ${confidence}%`,
+      ``,
+      `=== AI INVESTMENT DEBATE VERDICT ===`,
+      `Judge Verdict: ${judge?.finalVerdict ?? "N/A"}`,
+      `Debate Winner: ${judge?.winner ?? "Balanced"}`,
+      `Judge Confidence: ${judgeConfidence}%`,
+      `Investment Score: ${judgeScore}/100`,
+      `Judge Summary: ${judge?.investmentSummary ?? "N/A"}`,
+      `Why Bull Won: ${judge?.whyBullWon ?? "N/A"}`,
+      `Why Bear Won: ${judge?.whyBearWon ?? "N/A"}`,
+      `Judge Reasoning: ${judge?.finalReasoning ?? "N/A"}`,
+      ``,
+      `Bull Case: ${state.bullData?.recommendation ?? "N/A"} (${state.bullData?.confidence ?? 50}% confidence)`,
+      `Bear Case: ${state.bearData?.recommendation ?? "N/A"} (${state.bearData?.confidence ?? 50}% confidence)`,
       ``,
       `Key Risks: ${risk?.risks?.map((r) => r.category).join(", ") ?? "N/A"}`,
       `News Highlights: ${news?.keyEvents?.slice(0, 3).join("; ") ?? "N/A"}`,
@@ -633,7 +696,7 @@ const finalDecision = async (state: typeof GraphState.State) => {
     const llm = getLLM().withStructuredOutput(schema);
     const result = await llm.invoke([
       new SystemMessage(
-        "You are a senior investment analyst making a final recommendation. Your recommendation must align with the confidence score and the aggregated data. BUY when scores are strong and risk is low. HOLD for mixed signals. PASS for weak fundamentals or high risk. Be direct and specific. Return a structured JSON. All numeric fields MUST be plain numbers (e.g., 75), never strings, never text like 'Not Provided' or 'N/A'. If data is genuinely unavailable, use a reasonable default numeric estimate instead of a placeholder string."
+        "You are a senior investment analyst making a final recommendation after an AI bull vs bear debate. Your recommendation must align with the judge's debate verdict, confidence score, and aggregated research data. Strongly consider the debate winner and judge reasoning. BUY when scores are strong, bull case won, and risk is low. HOLD for mixed signals or balanced debate. PASS for weak fundamentals, bear case won, or high risk. Be direct and specific. Return a structured JSON. All numeric fields MUST be plain numbers (e.g., 75), never strings, never text like 'Not Provided' or 'N/A'. If data is genuinely unavailable, use a reasonable default numeric estimate instead of a placeholder string."
       ),
       new HumanMessage(
         `Company: ${state.companyName}\n\nAggregated Research Summary:\n${context}\n\nProvide the final investment recommendation.`
@@ -655,13 +718,20 @@ const finalDecision = async (state: typeof GraphState.State) => {
     console.error("[final_decision] Error (using deterministic fallback):", err);
 
     // Deterministic fallback — never returns 0% confidence
-    const rec = confidence >= 65 ? "HOLD" : "PASS";
+    const judgeVerdict = judge?.finalVerdict;
+    const rec =
+      judgeVerdict === "BUY" || judgeVerdict === "HOLD" || judgeVerdict === "PASS"
+        ? judgeVerdict
+        : confidence >= 65
+          ? "HOLD"
+          : "PASS";
     return {
       recommendation: rec,
       confidence,
       reasoning: [
         "Research data was collected across financial, news, competitor, risk, and valuation dimensions.",
-        "Confidence score was calculated from weighted agent scores.",
+        "AI bull vs bear debate was adjudicated by the judge agent.",
+        "Confidence score was calculated from weighted agent and debate scores.",
         "Manual review is recommended due to LLM response error on final synthesis.",
       ],
       positives: ["Research data successfully collected across all dimensions."],
@@ -681,13 +751,22 @@ const workflow = new StateGraph(GraphState)
   .addNode("analyze_competitors", analyzeCompetitors)
   .addNode("assess_risks", assessRisks)
   .addNode("evaluate_valuation", evaluateValuation)
+  .addNode("bull_agent", bullAgentNode)
+  .addNode("bear_agent", bearAgentNode)
+  .addNode("judge_agent", judgeAgentNode)
   .addNode("final_decision", finalDecision)
   .addEdge("__start__", "fetch_financials")
   .addEdge("fetch_financials", "fetch_news")
   .addEdge("fetch_news", "analyze_competitors")
   .addEdge("analyze_competitors", "assess_risks")
   .addEdge("assess_risks", "evaluate_valuation")
-  .addEdge("evaluate_valuation", "final_decision")
+  // Parallel debate branches after valuation
+  .addEdge("evaluate_valuation", "bull_agent")
+  .addEdge("evaluate_valuation", "bear_agent")
+  // Judge waits for both bull and bear to complete (LangGraph fan-in)
+  .addEdge("bull_agent", "judge_agent")
+  .addEdge("bear_agent", "judge_agent")
+  .addEdge("judge_agent", "final_decision")
   .addEdge("final_decision", "__end__");
 
 export const agent = workflow.compile();

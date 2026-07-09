@@ -9,6 +9,8 @@ import StockDashboard from "@/components/StockDashboard";
 import DetailedReport from "@/components/DetailedReport";
 import VerdictCard from "@/components/VerdictCard";
 import ResearchProgress from "@/components/ResearchProgress";
+import DebateProgress from "@/components/debate/DebateProgress";
+import DebateTimeline from "@/components/debate/DebateTimeline";
 import HelpChatWidget from "@/components/HelpChatWidget";
 import MethodologyPanel from "@/components/MethodologyPanel";
 import Button from "@/components/ui/Button";
@@ -37,6 +39,11 @@ export default function StockPageClient({ slug }: StockPageClientProps) {
   const [result, setResult] = useState<ResearchResult | null>(null);
   const [activeNode, setActiveNode] = useState<string | null>(null);
   const [completedNodes, setCompletedNodes] = useState<string[]>([]);
+  const [debateNodes, setDebateNodes] = useState({
+    bullComplete: false,
+    bearComplete: false,
+    judgeComplete: false,
+  });
   const [companyName, setCompanyName] = useState("");
   const [credits, setCredits] = useState<number | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
@@ -80,6 +87,7 @@ export default function StockPageClient({ slug }: StockPageClientProps) {
     setResearchState("loading");
     setActiveNode("fetch_financials");
     setCompletedNodes([]);
+    setDebateNodes({ bullComplete: false, bearComplete: false, judgeComplete: false });
     setResult(null);
 
     try {
@@ -124,15 +132,36 @@ export default function StockPageClient({ slug }: StockPageClientProps) {
           try {
             const event = JSON.parse(line);
             if (event.type === "node_complete") {
-              const node = event.node;
+              const node = event.node as string;
               setCompletedNodes((prev) =>
                 prev.includes(node) ? prev : [...prev, node]
               );
+
               if (node === "fetch_financials") setActiveNode("fetch_news");
               else if (node === "fetch_news") setActiveNode("analyze_competitors");
               else if (node === "analyze_competitors") setActiveNode("assess_risks");
               else if (node === "assess_risks") setActiveNode("evaluate_valuation");
-              else if (node === "evaluate_valuation") setActiveNode("final_decision");
+              else if (node === "evaluate_valuation") setActiveNode("bull_agent");
+              else if (node === "bull_agent" || node === "bear_agent") {
+                setDebateNodes((prev) => {
+                  const next = {
+                    ...prev,
+                    bullComplete: node === "bull_agent" ? true : prev.bullComplete,
+                    bearComplete: node === "bear_agent" ? true : prev.bearComplete,
+                  };
+                  if (next.bullComplete && next.bearComplete) {
+                    setActiveNode("judge_agent");
+                  } else {
+                    setActiveNode("bull_agent");
+                  }
+                  return next;
+                });
+              } else if (node === "judge_agent") {
+                setDebateNodes((prev) => ({ ...prev, judgeComplete: true }));
+                setActiveNode("final_decision");
+              } else if (node === "final_decision") {
+                setActiveNode(null);
+              }
             } else if (event.type === "complete") {
               setResult(event.result);
               setResearchState("result");
@@ -170,8 +199,22 @@ export default function StockPageClient({ slug }: StockPageClientProps) {
               completedNodes={completedNodes}
             />
           </div>
-          <div className="lg:col-span-2 flex items-center justify-center h-64 saas-card">
-            <Loader2 className="w-8 h-8 text-[var(--primary)] animate-spin" />
+          <div className="lg:col-span-2 space-y-4">
+            <DebateProgress
+              bullComplete={debateNodes.bullComplete}
+              bearComplete={debateNodes.bearComplete}
+              judgeComplete={debateNodes.judgeComplete}
+              bullActive={
+                activeNode === "bull_agent" && !debateNodes.bullComplete
+              }
+              bearActive={
+                activeNode === "bull_agent" && !debateNodes.bearComplete
+              }
+              judgeActive={activeNode === "judge_agent" && !debateNodes.judgeComplete}
+            />
+            <div className="flex items-center justify-center h-48 saas-card">
+              <Loader2 className="w-8 h-8 text-[var(--primary)] animate-spin" />
+            </div>
           </div>
         </div>
       )}
@@ -196,6 +239,8 @@ export default function StockPageClient({ slug }: StockPageClientProps) {
             positives={result.positives}
             negatives={result.negatives}
           />
+
+          {result.debate && <DebateTimeline debate={result.debate} />}
 
           <DetailedReport report={result} />
         </div>

@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { agent } from "@/lib/agent";
 import { createClient } from "@/lib/supabase/server";
+import { FALLBACK_BULL } from "@/lib/agents/bullAgent";
+import { FALLBACK_BEAR } from "@/lib/agents/bearAgent";
+import { FALLBACK_JUDGE } from "@/lib/agents/judgeAgent";
+import type { ResearchResult, BullAnalysis, BearAnalysis, JudgeAnalysis, NewsSentiment, CompetitorAnalysis, RiskAnalysis } from "@/types";
 
 export const dynamic = "force-dynamic";
 
@@ -57,12 +61,12 @@ export async function POST(request: Request) {
     const customStream = new ReadableStream({
       async start(controller) {
         try {
-          const accumulatedState: any = { companyName };
+          const accumulatedState: Record<string, unknown> = { companyName };
           const eventStream = await agent.stream(initialState, { streamMode: "updates" });
 
           for await (const chunk of eventStream) {
             const nodeName = Object.keys(chunk)[0];
-            const stateUpdate = (chunk as any)[nodeName];
+            const stateUpdate = (chunk as Record<string, Record<string, unknown>>)[nodeName];
             Object.assign(accumulatedState, stateUpdate);
 
             const eventData = {
@@ -75,15 +79,15 @@ export async function POST(request: Request) {
           }
 
           // Final decision response mapping with robust flat schema
-          const responseData = {
-            companyName: accumulatedState.companyName || companyName,
-            verdict: accumulatedState.recommendation || "PASS",
-            confidence: accumulatedState.confidence ?? 50,
-            reasoning: accumulatedState.reasoning || [],
-            positives: accumulatedState.positives || [],
-            negatives: accumulatedState.negatives || [],
-            summary: accumulatedState.summary || "",
-            financial: accumulatedState.financialData || {
+          const responseData: ResearchResult = {
+            companyName: (accumulatedState.companyName as string) || companyName,
+            verdict: (accumulatedState.recommendation as ResearchResult["verdict"]) || "PASS",
+            confidence: (accumulatedState.confidence as number) ?? 50,
+            reasoning: (accumulatedState.reasoning as string[]) || [],
+            positives: (accumulatedState.positives as string[]) || [],
+            negatives: (accumulatedState.negatives as string[]) || [],
+            summary: (accumulatedState.summary as string) || "",
+            financial: (accumulatedState.financialData as ResearchResult["financial"]) || {
               ticker: "N/A",
               revenueGrowth: "Data unavailable",
               peRatio: "Data unavailable",
@@ -95,7 +99,7 @@ export async function POST(request: Request) {
               rawText: "Financial data could not be retrieved.",
               sources: ["Yahoo Finance"]
             },
-            news: accumulatedState.newsData || {
+            news: (accumulatedState.newsData as NewsSentiment | undefined) ?? {
               sentiment: "neutral",
               sentimentScore: 50,
               positives: [],
@@ -104,7 +108,7 @@ export async function POST(request: Request) {
               investmentImpact: "Insufficient news data to assess investment impact.",
               sources: ["Tavily Search"]
             },
-            competitors: accumulatedState.competitorData || {
+            competitors: (accumulatedState.competitorData as CompetitorAnalysis | undefined) ?? {
               marketPosition: "Competitor data unavailable.",
               strengths: [],
               weaknesses: [],
@@ -112,7 +116,7 @@ export async function POST(request: Request) {
               score: 50,
               sources: ["Tavily Search"]
             },
-            risks: accumulatedState.riskData || {
+            risks: (accumulatedState.riskData as RiskAnalysis | undefined) ?? {
               riskScore: 50,
               level: "Medium",
               risks: [
@@ -124,15 +128,20 @@ export async function POST(request: Request) {
               ],
               sources: ["Yahoo Finance", "Tavily Search"]
             },
-            valuation: accumulatedState.valuationData || {
+            valuation: (accumulatedState.valuationData as ResearchResult["valuation"]) || {
               valuation: "Fairly Valued",
               score: 50,
               positives: [],
               negatives: ["Valuation data unavailable."],
               sources: ["Yahoo Finance"]
             },
-            earnings: accumulatedState.earnings || [],
-            analystData: accumulatedState.analystData || null,
+            debate: {
+              bull: (accumulatedState.bullData as BullAnalysis | undefined) ?? FALLBACK_BULL,
+              bear: (accumulatedState.bearData as BearAnalysis | undefined) ?? FALLBACK_BEAR,
+              judge: (accumulatedState.judgeData as JudgeAnalysis | undefined) ?? FALLBACK_JUDGE,
+            },
+            earnings: (accumulatedState.earnings as ResearchResult["earnings"]) || [],
+            analystData: (accumulatedState.analystData as ResearchResult["analystData"]) ?? undefined,
           };
 
           controller.enqueue(
@@ -153,13 +162,14 @@ export async function POST(request: Request) {
           }
 
           controller.close();
-        } catch (err: any) {
+        } catch (err: unknown) {
           console.error("Stream generation error:", err);
+          const message = err instanceof Error ? err.message : "Internal error during streaming.";
           controller.enqueue(
             encoder.encode(
               JSON.stringify({
                 type: "error",
-                error: err?.message || "Internal error during streaming.",
+                error: message,
               }) + "\n"
             )
           );
@@ -175,10 +185,11 @@ export async function POST(request: Request) {
         "Connection": "keep-alive",
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Research API Error:", error);
+    const message = error instanceof Error ? error.message : "Failed to perform research.";
     return NextResponse.json(
-      { error: error?.message || "Failed to perform research." },
+      { error: message },
       { status: 500 }
     );
   }

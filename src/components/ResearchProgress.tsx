@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { CheckCircle2, Loader2, Search, Activity } from "lucide-react";
+import { CheckCircle2, Loader2, Activity } from "lucide-react";
 
 interface ResearchProgressProps {
   companyName: string;
@@ -15,6 +15,9 @@ const STEPS = [
   { id: "analyze_competitors", label: "Comparing competitors...", sub: "Market share, pricing & AI leadership" },
   { id: "assess_risks", label: "Evaluating risks...", sub: "Categorized severity matrix synthesis" },
   { id: "evaluate_valuation", label: "Evaluating valuation...", sub: "Valuation attractiveness calculations" },
+  { id: "bull_agent", label: "Bull analyst building case...", sub: "Growth thesis & opportunity arguments" },
+  { id: "bear_agent", label: "Bear analyst building case...", sub: "Risk thesis & downside arguments" },
+  { id: "judge_agent", label: "Judge adjudicating debate...", sub: "Weighing bull vs bear evidence" },
   { id: "final_decision", label: "Generating recommendation...", sub: "Deterministic confidence synthesis" },
 ];
 
@@ -37,7 +40,13 @@ export default function ResearchProgress({ companyName, activeNode, completedNod
       <div className="space-y-6">
         {STEPS.map((step) => {
           const isCompleted = completedNodes.includes(step.id);
-          const isCurrent = activeNode === step.id;
+          const isDebatePhase =
+            completedNodes.includes("evaluate_valuation") &&
+            !completedNodes.includes("judge_agent");
+          const isParallelDebateStep = step.id === "bull_agent" || step.id === "bear_agent";
+          const isCurrent =
+            activeNode === step.id ||
+            (isDebatePhase && isParallelDebateStep && !completedNodes.includes(step.id));
           const isPending = !isCompleted && !isCurrent;
 
           return (

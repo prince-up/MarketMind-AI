@@ -409,6 +409,86 @@ a:focus-visible {
   padding-top: 1rem;
 }
 
+/* AI Investment Debate animations */
+@keyframes debate-slide-left {
+  from {
+    opacity: 0;
+    transform: translateX(-32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes debate-slide-right {
+  from {
+    opacity: 0;
+    transform: translateX(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes debate-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes debate-winner-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 0%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 24px 4px color-mix(in srgb, var(--primary) 20%, transparent);
+  }
+}
+
+@keyframes debate-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+.debate-slide-left {
+  animation: debate-slide-left 0.6s ease-out both;
+}
+
+.debate-slide-right {
+  animation: debate-slide-right 0.6s ease-out both;
+}
+
+.debate-slide-up {
+  animation: debate-slide-up 0.7s ease-out both;
+}
+
+.debate-winner-glow {
+  animation: debate-winner-glow 2.5s ease-in-out infinite;
+}
+
+.debate-pulse {
+  animation: debate-pulse 1.5s ease-in-out infinite;
+}
+
+.debate-arena {
+  position: relative;
+}
+
+.debate-vs-row {
+  position: relative;
+}
+
 /* Print Styles for PDF Export */
 @media print {
   body {

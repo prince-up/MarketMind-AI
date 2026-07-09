@@ -83,6 +83,41 @@ export interface AnalystData {
   recommendationKey: string;
 }
 
+export interface BullAnalysis {
+  recommendation: string;
+  confidence: number;
+  investment_thesis: string;
+  strongest_arguments: string[];
+  supporting_metrics: string[];
+  conclusion: string;
+}
+
+export interface BearAnalysis {
+  recommendation: string;
+  confidence: number;
+  investment_thesis: string;
+  strongest_arguments: string[];
+  risks: string[];
+  conclusion: string;
+}
+
+export interface JudgeAnalysis {
+  finalVerdict: string;
+  winner: "Bull" | "Bear" | "Balanced";
+  confidence: number;
+  investmentSummary: string;
+  whyBullWon: string;
+  whyBearWon: string;
+  finalReasoning: string;
+  investmentScore: number;
+}
+
+export interface DebateAnalysis {
+  bull: BullAnalysis;
+  bear: BearAnalysis;
+  judge: JudgeAnalysis;
+}
+
 export interface ResearchResult {
   companyName: string;
   verdict: "BUY" | "HOLD" | "PASS";
@@ -96,6 +131,7 @@ export interface ResearchResult {
   competitors: CompetitorAnalysis;
   risks: RiskAnalysis;
   valuation: ValuationAnalysis;
+  debate?: DebateAnalysis;
   earnings?: EarningsHistoryEntry[];
   analystData?: AnalystData;
 }
